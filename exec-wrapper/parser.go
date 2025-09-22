@@ -10,9 +10,9 @@ func stripANSI(s string) string {
 	return ansi.ReplaceAllString(s, "")
 }
 
+// extractTimeFromTraceLine extracts the time from a trace line
+// We assume the trace is with `--progress=plain`
 func extractTimeFromTraceLine(line string) string {
-	line = stripANSI(line)
-
 	re := regexp.MustCompile(`\[(.*?)\]`)
 	match := re.FindStringSubmatch(line)
 

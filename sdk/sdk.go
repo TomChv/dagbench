@@ -10,6 +10,12 @@ import (
 type SDK interface {
 	Init() *execwrapper.ExecWrapper
 
+	Develop() *execwrapper.ExecWrapper
+
+	Functions() *execwrapper.ExecWrapper
+
+	Call(callArgs []string) *execwrapper.ExecWrapper
+
 	PruneCache() error
 }
 

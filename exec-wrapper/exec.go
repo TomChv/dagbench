@@ -8,22 +8,24 @@ import (
 )
 
 type ExecWrapper struct {
+	name        string
 	cmd         *exec.Cmd
 	spanMarkers []string
 }
 
-func NewExecWrapper(cmd *exec.Cmd, spanMarkers []string) *ExecWrapper {
+func NewExecWrapper(name string, cmd *exec.Cmd, spanMarkers []string) *ExecWrapper {
 	return &ExecWrapper{
+		name:        name,
 		cmd:         cmd,
 		spanMarkers: spanMarkers,
 	}
 }
 
-func (e *ExecWrapper) Exec(name string) (*ExecReport, error) {
-	fmt.Println("Executing", name)
+func (e *ExecWrapper) Exec() (*ExecReport, error) {
+	fmt.Println("Executing", e.name)
 
 	report := &ExecReport{
-		name:   name,
+		name:   e.name,
 		values: make(map[string]string),
 	}
 
@@ -38,7 +40,7 @@ func (e *ExecWrapper) Exec(name string) (*ExecReport, error) {
 
 	scanner := bufio.NewScanner(stderr)
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := stripANSI(scanner.Text())
 
 		report.stderr += line + "\n"
 

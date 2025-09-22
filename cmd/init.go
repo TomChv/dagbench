@@ -31,9 +31,7 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("failed to prune cache: %w", err)
 		}
 
-		initCmd := sdk.Init()
-
-		execReport, err := initCmd.Exec(fmt.Sprintf("init-%s-%s", language, config.Version()))
+		execReport, err := sdk.Init().Exec()
 		if err != nil {
 			return fmt.Errorf("failed to execute setup command: %w", err)
 		}
@@ -48,9 +46,9 @@ var initCmd = &cobra.Command{
 			if err := execReport.SaveAsCSVAt(saveReportDir); err != nil {
 				return fmt.Errorf("failed to save report: %w", err)
 			}
-		} else {
-			fmt.Println(execReport)
 		}
+
+		fmt.Println(execReport)
 
 		if saveOutputDir != "" {
 			if err := execReport.SaveOutputAt(saveOutputDir); err != nil {

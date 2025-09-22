@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"fmt"
 	"os/exec"
 	"quartz/dagbenchmark.io/config"
 
@@ -18,12 +19,68 @@ func newGo(config *config.Config) *Go {
 }
 
 func (g *Go) Init() *execwrapper.ExecWrapper {
-	cmd := exec.Command(g.config.BinPath, "-vv", "init", "--sdk=go", "--source=.", "--name=test")
+	cmd := exec.Command(g.config.BinPath, "-vv", "--progress=plain", "init", "--sdk=go", "--source=.", "--name=test")
 	cmd.Dir = g.config.TempDir
 
-	return execwrapper.NewExecWrapper(cmd, []string{
-		"run codegen",
-		"moduleSource",
-		"generatedContextDirectory",
-	})
+	return execwrapper.NewExecWrapper(
+		fmt.Sprintf("init-go-%s", g.config.Version()),
+		cmd,
+		[]string{
+			"run codegen",
+			"moduleSource",
+			"generatedContextDirectory",
+		})
+}
+
+func (g *Go) Develop() *execwrapper.ExecWrapper {
+	cmd := exec.Command(g.config.BinPath, "-vv", "--progress=plain", "develop")
+	cmd.Dir = g.config.TempDir
+
+	return execwrapper.NewExecWrapper(
+		fmt.Sprintf("init-go-%s", g.config.Version()),
+		cmd,
+		[]string{
+			"develop",
+			"run codegen",
+			"moduleSource",
+			"generatedContextDirectory",
+		})
+}
+
+func (g *Go) Functions() *execwrapper.ExecWrapper {
+	cmd := exec.Command(g.config.BinPath, "-vv", "--progress=plain", "functions")
+	cmd.Dir = g.config.TempDir
+
+	return execwrapper.NewExecWrapper(
+		fmt.Sprintf("functions-go-%s", g.config.Version()),
+		cmd,
+		[]string{
+			"finding module configuration",
+			"initializing module",
+			"getModDef",
+			"loading type definitions",
+			"load module",
+		})
+}
+
+func (g *Go) Call(callArgs []string) *execwrapper.ExecWrapper {
+	cmdArgs := append([]string{"-vv", "--progress=plain", "call"}, callArgs...)
+
+	cmd := exec.Command(g.config.BinPath, cmdArgs...)
+	cmd.Dir = g.config.TempDir
+
+	// Extract the function name from the first argument
+	functionName := convertFunctionNameToTraceMarker(callArgs[0])
+
+	return execwrapper.NewExecWrapper(
+		fmt.Sprintf("call-%s-go-%s", functionName, g.config.Version()),
+		cmd,
+		[]string{
+			"finding module configuration",
+			"initializing module",
+			"getModDef",
+			"loading type definitions",
+			"load module",
+			functionName,
+		})
 }
