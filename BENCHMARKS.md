@@ -8,7 +8,7 @@ Create a new dagger module using `dagbenchmark`, this will create a module on a 
 measure the initilization time and save a config file that you will need for the next steps.
 
 ```bash
-dagbenchmark init --save-config-dir ./.configs/my-module --save-report-dir ./.reports/my-module
+dagbenchmark init --config-dir ./.configs/my-module --report-dir ./.reports/my-module
 ```
 
 You should see something like this:
@@ -34,7 +34,7 @@ Saving report at XXX/.reports/my-module/init-go-vX.XX.XX-results.csv
 Saving config at XXX/.configs/my-module/go-vX.XX.XX.json
 ```
 
-The config file is saved in the directory you specified with `--save-config-dir`. It contains required information to run further commands.
+The config file is saved in the directory you specified with `--config-dir`. It contains required information to run further commands.
 
 Example of the config file:
 
@@ -52,22 +52,31 @@ Example of the config file:
 Now that the module is initialized, you can run the develop, functions and call commands using the config file you created in the init.
 You can set the flag `-r` to run multiple times, this will compute the average time in the final report.
 
-**Functions**
+
+You can run the develop, functions and call commands using the config file you created in the init in one call with `flow`.
 
 ```bash
-dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --save-report-dir ./.reports/my-module functions
+go run ./main.go --config-file .configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module flow 'container-echo --string-arg="foo"'
 ```
 
-**Develop**
+OR you can run them one by one:
 
-```
-dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --save-report-dir ./.reports/my-module develop 
-```
-
-**Call**
+- Functions
 
 ```bash
-dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --save-report-dir ./.reports/my-module call 'container-echo --string-arg="foo"'
+dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module functions
+```
+
+- Develop
+
+```
+dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module develop 
+```
+
+- Call
+
+```bash
+dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module call 'container-echo --string-arg="foo"'
 ```
 
 ### 3. Measure the dev engine

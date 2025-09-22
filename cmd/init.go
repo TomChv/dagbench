@@ -9,13 +9,14 @@ import (
 )
 
 var language string
-var saveConfigDir string
+var configDir string
+var alias string
 
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "benchmark dagger init",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := config.NewConfig(language)
+		config, err := config.NewConfig(language, config.WithName(alias))
 		if err != nil {
 			return fmt.Errorf("failed to create configuration: %w", err)
 		}
@@ -29,8 +30,8 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("failed to init module: %w", err)
 		}
 
-		if saveConfigDir != "" {
-			if err := config.Save(saveConfigDir); err != nil {
+		if configDir != "" {
+			if err := config.Save(configDir); err != nil {
 				return fmt.Errorf("failed to save config: %w", err)
 			}
 		}
@@ -41,5 +42,6 @@ var initCmd = &cobra.Command{
 
 func init() {
 	initCmd.Flags().StringVarP(&language, "language", "l", "go", "Language to use for benchmark")
-	initCmd.Flags().StringVar(&saveConfigDir, "save-config-dir", "", "Save config at path")
+	initCmd.Flags().StringVar(&configDir, "config-dir", "", "Directory to save config file to")
+	initCmd.Flags().StringVar(&alias, "alias", "", "Alias for the benchmark")
 }

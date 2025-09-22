@@ -12,6 +12,7 @@ import (
 )
 
 type Config struct {
+	Name     string   `json:"name"`
 	Language Language `json:"language"`
 	BinPath  string   `json:"binPath"`
 	TempDir  string   `json:"tempDir"`
@@ -24,6 +25,12 @@ type ConfigOpts func(c *Config)
 func WithBinPath(binPath string) ConfigOpts {
 	return func(c *Config) {
 		c.BinPath = binPath
+	}
+}
+
+func WithName(name string) ConfigOpts {
+	return func(c *Config) {
+		c.Name = name
 	}
 }
 
@@ -92,6 +99,10 @@ func NewConfigFromFile(path string) (*Config, error) {
 
 func (c *Config) Save(dirpath string) error {
 	fileName := fmt.Sprintf("%s-%s.json", c.Language, c.Version())
+	if c.Name != "" {
+		fileName = fmt.Sprintf("%s.json", c.Name)
+	}
+
 	absPath, err := filepath.Abs(dirpath)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
@@ -124,8 +135,8 @@ func (c *Config) Save(dirpath string) error {
 
 func (c *Config) String() string {
 	return fmt.Sprintf(
-		"Dagger version\t: %s\nDagger path\t: %s\nLanguage\t: %s\nTemp dir\t: %s",
-		c.version, c.BinPath, c.Language, c.TempDir,
+		"Name\t\t: %s\nDagger version\t: %s\nDagger path\t: %s\nLanguage\t: %s\nTemp dir\t: %s",
+		c.Name, c.version, c.BinPath, c.Language, c.TempDir,
 	)
 }
 

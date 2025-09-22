@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"text/tabwriter"
 )
 
 type Report struct {
@@ -61,15 +63,18 @@ func NewFromCSV(path string) (*Report, error) {
 }
 
 func (r *Report) String() string {
-	var res strings.Builder
+	var b strings.Builder
 
-	fmt.Fprintf(&res, "Report %s results\n", r.name)
+	fmt.Fprintf(&b, "Report %s\n", r.name)
+	tw := tabwriter.NewWriter(&b, 0, 0, 2, ' ', 0)
 
 	for k, v := range r.values {
-		fmt.Fprintf(&res, "%s\t: %s\n", k, v)
+		fmt.Fprintf(tw, "%s\t:\t %s\n", k, v)
 	}
 
-	return res.String()
+	_ = tw.Flush()
+
+	return b.String()
 }
 
 func (r *Report) Stderr() string {

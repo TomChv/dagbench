@@ -22,8 +22,13 @@ func (g *Go) Init() *execwrapper.ExecWrapper {
 	cmd := exec.Command(g.config.BinPath, "-vv", "--progress=plain", "init", "--sdk=go", "--source=.", "--name=test")
 	cmd.Dir = g.config.TempDir
 
+	name := fmt.Sprintf("init-go-%s", g.config.Version())
+	if g.config.Name != "" {
+		name = fmt.Sprintf("%s-init", g.config.Name)
+	}
+
 	return execwrapper.NewExecWrapper(
-		fmt.Sprintf("init-go-%s", g.config.Version()),
+		name,
 		cmd,
 		[]string{
 			"run codegen",
@@ -36,8 +41,13 @@ func (g *Go) Develop() *execwrapper.ExecWrapper {
 	cmd := exec.Command(g.config.BinPath, "-vv", "--progress=plain", "develop")
 	cmd.Dir = g.config.TempDir
 
+	name := fmt.Sprintf("develop-go-%s", g.config.Version())
+	if g.config.Name != "" {
+		name = fmt.Sprintf("%s-develop", g.config.Name)
+	}
+
 	return execwrapper.NewExecWrapper(
-		fmt.Sprintf("develop-go-%s", g.config.Version()),
+		name,
 		cmd,
 		[]string{
 			"develop",
@@ -51,8 +61,13 @@ func (g *Go) Functions() *execwrapper.ExecWrapper {
 	cmd := exec.Command(g.config.BinPath, "-vv", "--progress=plain", "functions")
 	cmd.Dir = g.config.TempDir
 
+	name := fmt.Sprintf("functions-go-%s", g.config.Version())
+	if g.config.Name != "" {
+		name = fmt.Sprintf("%s-functions", g.config.Name)
+	}
+
 	return execwrapper.NewExecWrapper(
-		fmt.Sprintf("functions-go-%s", g.config.Version()),
+		name,
 		cmd,
 		[]string{
 			"finding module configuration",
@@ -72,8 +87,13 @@ func (g *Go) Call(callArgs []string) *execwrapper.ExecWrapper {
 	// Extract the function name from the first argument
 	functionName := convertFunctionNameToTraceMarker(callArgs[0])
 
+	name := fmt.Sprintf("call-%s-go-%s", functionName, g.config.Version())
+	if g.config.Name != "" {
+		name = fmt.Sprintf("%s-call", g.config.Name)
+	}
+
 	return execwrapper.NewExecWrapper(
-		fmt.Sprintf("call-%s-go-%s", functionName, g.config.Version()),
+		name,
 		cmd,
 		[]string{
 			"finding module configuration",

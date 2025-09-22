@@ -8,8 +8,8 @@ import (
 
 var ErrMissingConfigFile = errors.New("missing config file")
 
-var saveReportDir string
-var saveOutputDir string
+var reportDir string
+var outputDir string
 var configFile string
 var runs int
 
@@ -24,8 +24,8 @@ func Execute() error {
 
 func init() {
 	// TODO: improve flag separation
-	rootCmd.PersistentFlags().StringVar(&saveReportDir, "save-report-dir", "", "Save report directory")
-	rootCmd.PersistentFlags().StringVar(&saveOutputDir, "save-output-dir", "", "Save output directory")
+	rootCmd.PersistentFlags().StringVar(&reportDir, "report-dir", "", "Directory to save reports in")
+	rootCmd.PersistentFlags().StringVar(&outputDir, "output-dir", "", "Directory to save command output in")
 	rootCmd.PersistentFlags().StringVar(&configFile, "config-file", "", "Config file")
 	rootCmd.PersistentFlags().IntVarP(&runs, "runs", "r", 1, "Number of runs (no stderr can be output in that case)")
 
@@ -34,4 +34,5 @@ func init() {
 	rootCmd.AddCommand(functionsCmd)
 	rootCmd.AddCommand(callCmd)
 	rootCmd.AddCommand(diffCmd)
+	rootCmd.AddCommand(flowCmd)
 }

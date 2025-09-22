@@ -24,8 +24,8 @@ var diffCmd = &cobra.Command{
 
 		diffReport := report1.Diff(report2)
 
-		if saveReportDir != "" {
-			if err := diffReport.SaveAsCSVAt(saveReportDir); err != nil {
+		if reportDir != "" {
+			if err := diffReport.SaveAsCSVAt(reportDir); err != nil {
 				return err
 			}
 		}

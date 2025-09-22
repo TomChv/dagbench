@@ -44,15 +44,68 @@ func run(config *config.Config, sdk sdk.SDK, exWrapperBuilder func() *execwrappe
 	fmt.Println("\n********* REPORTING **********")
 	fmt.Println(result)
 
-	if saveReportDir != "" {
-		if err := result.SaveAsCSVAt(saveReportDir); err != nil {
+	if reportDir != "" {
+		if err := result.SaveAsCSVAt(reportDir); err != nil {
 			return err
 		}
 	}
 
-	if saveOutputDir != "" && runs == 1 {
-		if err := result.SaveOutputAt(saveOutputDir); err != nil {
+	if outputDir != "" && runs == 1 {
+		if err := result.SaveOutputAt(outputDir); err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func runFlow(config *config.Config, sdk sdk.SDK, exWrapperBuilders []func() *execwrapper.ExecWrapper) (err error) {
+	fmt.Println("********* CONFIG **********")
+	fmt.Println(config)
+
+	fmt.Println("\n********* EXECUTION **********")
+
+	reportsMap := make(map[int][]*report.Report)
+	for range runs {
+		for i, exWrapperBuilder := range exWrapperBuilders {
+			if err := sdk.PruneCache(); err != nil {
+				return fmt.Errorf("failed to prune cache: %w", err)
+			}
+
+			runReport, err := exWrapperBuilder().Exec()
+			if err != nil {
+				return err
+			}
+
+			reportsMap[i] = append(reportsMap[i], runReport)
+		}
+	}
+
+	var reports []*report.Report
+	for _, reportsMap := range reportsMap {
+		if len(reportsMap) == 1 {
+			reports = append(reports, reportsMap[0])
+			continue
+		}
+
+		fmt.Printf("Merging %d reports\n", len(reportsMap))
+
+		result, err := report.Merge(reportsMap...)
+		if err != nil {
+			return fmt.Errorf("failed to merge reports: %w", err)
+		}
+
+		reports = append(reports, result)
+	}
+
+	fmt.Println("\n********* REPORTING **********")
+	for _, report := range reports {
+		fmt.Println(report)
+
+		if reportDir != "" {
+			if err := report.SaveAsCSVAt(reportDir); err != nil {
+				return err
+			}
 		}
 	}
 
