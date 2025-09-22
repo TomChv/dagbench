@@ -37,7 +37,7 @@ func (g *Go) Develop() *execwrapper.ExecWrapper {
 	cmd.Dir = g.config.TempDir
 
 	return execwrapper.NewExecWrapper(
-		fmt.Sprintf("init-go-%s", g.config.Version()),
+		fmt.Sprintf("develop-go-%s", g.config.Version()),
 		cmd,
 		[]string{
 			"develop",

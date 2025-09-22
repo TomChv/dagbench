@@ -44,7 +44,7 @@ func (e *ExecWrapper) exec() (*report.Report, error) {
 	for scanner.Scan() {
 		line := stripANSI(scanner.Text())
 
-		report.AddStderr(line + "\n")
+		report = report.AddStderr(line + "\n")
 
 		for _, marker := range e.spanMarkers {
 			if strings.Contains(line, marker) && strings.Contains(line, "DONE") {
@@ -53,7 +53,7 @@ func (e *ExecWrapper) exec() (*report.Report, error) {
 					return nil, fmt.Errorf("failed to extract time from trace line: %w", err)
 				}
 
-				report.AddValue(marker, duration)
+				report = report.AddValue(marker, duration)
 
 				break
 			}

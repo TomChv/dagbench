@@ -23,6 +23,7 @@ func Execute() error {
 }
 
 func init() {
+	// TODO: improve flag separation
 	rootCmd.PersistentFlags().StringVar(&saveReportDir, "save-report-dir", "", "Save report directory")
 	rootCmd.PersistentFlags().StringVar(&saveOutputDir, "save-output-dir", "", "Save output directory")
 	rootCmd.PersistentFlags().StringVar(&configFile, "config-file", "", "Config file")
@@ -32,4 +33,5 @@ func init() {
 	rootCmd.AddCommand(developCmd)
 	rootCmd.AddCommand(functionsCmd)
 	rootCmd.AddCommand(callCmd)
+	rootCmd.AddCommand(diffCmd)
 }
