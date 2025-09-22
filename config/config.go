@@ -12,10 +12,11 @@ import (
 )
 
 type Config struct {
-	Name     string   `json:"name"`
-	Language Language `json:"language"`
-	BinPath  string   `json:"binPath"`
-	TempDir  string   `json:"tempDir"`
+	Name      string   `json:"name"`
+	Language  Language `json:"language"`
+	BinPath   string   `json:"binPath"`
+	TempDir   string   `json:"tempDir"`
+	ReportDir string   `json:"reportDir"`
 
 	version string
 }
@@ -34,6 +35,12 @@ func WithName(name string) ConfigOpts {
 	}
 }
 
+func WithReportDir(reportDir string) ConfigOpts {
+	return func(c *Config) {
+		c.ReportDir = reportDir
+	}
+}
+
 func NewConfig(language string, opts ...ConfigOpts) (*Config, error) {
 	parsedLanguage, err := stringToLanguage(language)
 	if err != nil {
@@ -46,6 +53,15 @@ func NewConfig(language string, opts ...ConfigOpts) (*Config, error) {
 
 	for _, opt := range opts {
 		opt(c)
+	}
+
+	if c.ReportDir == "" {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get current working directory: %w", err)
+		}
+
+		c.ReportDir = filepath.Join(wd, "bench-reports", c.Name)
 	}
 
 	if c.BinPath == "" {
@@ -135,8 +151,8 @@ func (c *Config) Save(dirpath string) error {
 
 func (c *Config) String() string {
 	return fmt.Sprintf(
-		"Name\t\t: %s\nDagger version\t: %s\nDagger path\t: %s\nLanguage\t: %s\nTemp dir\t: %s",
-		c.Name, c.version, c.BinPath, c.Language, c.TempDir,
+		"Name\t\t: %s\nDagger version\t: %s\nDagger path\t: %s\nLanguage\t: %s\nTemp dir\t: %s\nReport dir\t: %s",
+		c.Name, c.version, c.BinPath, c.Language, c.TempDir, c.ReportDir,
 	)
 }
 

@@ -11,12 +11,17 @@ import (
 var language string
 var configDir string
 var alias string
+var reportDir string
 
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "benchmark dagger init",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := config.NewConfig(language, config.WithName(alias))
+		config, err := config.NewConfig(
+			language,
+			config.WithName(alias),
+			config.WithReportDir(reportDir),
+		)
 		if err != nil {
 			return fmt.Errorf("failed to create configuration: %w", err)
 		}
@@ -43,5 +48,6 @@ var initCmd = &cobra.Command{
 func init() {
 	initCmd.Flags().StringVarP(&language, "language", "l", "go", "Language to use for benchmark")
 	initCmd.Flags().StringVar(&configDir, "config-dir", "", "Directory to save config file to")
+	initCmd.Flags().StringVar(&reportDir, "report-dir", "", "Directory to save reports in")
 	initCmd.Flags().StringVar(&alias, "alias", "", "Alias for the benchmark")
 }

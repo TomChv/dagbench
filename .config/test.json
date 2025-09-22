@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "language": "go",
+  "binPath": "/Users/tomchauveau/.asdf/shims/dagger",
+  "tempDir": "/var/folders/g5/2mpcw9d56cv1xybf6ns3vhzm0000gn/T/dagger-benchmark/8d8cd1a7-b558-4210-a48e-014842acd1f9",
+  "reportDir": "/Users/tomchauveau/Documents/github.com/TomChv/dagbenchmark/bench-reports/test"
+}

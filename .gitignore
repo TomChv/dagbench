@@ -2,6 +2,8 @@
 .reports/
 .outputs/
 
+*.csv
+
 .envrc
 .DS_Store
 dagbenchmark

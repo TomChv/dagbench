@@ -44,8 +44,8 @@ func run(config *config.Config, sdk sdk.SDK, exWrapperBuilder func() *execwrappe
 	fmt.Println("\n********* REPORTING **********")
 	fmt.Println(result)
 
-	if reportDir != "" {
-		if err := result.SaveAsCSVAt(reportDir); err != nil {
+	if config.ReportDir != "" {
+		if err := result.SaveAsCSVAt(config.ReportDir); err != nil {
 			return err
 		}
 	}
@@ -102,8 +102,8 @@ func runFlow(config *config.Config, sdk sdk.SDK, exWrapperBuilders []func() *exe
 	for _, report := range reports {
 		fmt.Println(report)
 
-		if reportDir != "" {
-			if err := report.SaveAsCSVAt(reportDir); err != nil {
+		if config.ReportDir != "" {
+			if err := report.SaveAsCSVAt(config.ReportDir); err != nil {
 				return err
 			}
 		}

@@ -43,7 +43,8 @@ Example of the config file:
   "language": "go",
   "binPath": "XXX/.asdf/shims/dagger",
   "tempDir": "XXXXX/T/dagger-benchmark/75fa767f-cd81-4297-bcac-4786d7b9d02f",
-  "version": "vX.XX.XX"
+  "version": "vX.XX.XX",
+  "reportDir": ".reports/my-module"
 }
 ```
 
@@ -56,7 +57,7 @@ You can set the flag `-r` to run multiple times, this will compute the average t
 You can run the develop, functions and call commands using the config file you created in the init in one call with `flow`.
 
 ```bash
-go run ./main.go --config-file .configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module flow 'container-echo --string-arg="foo"'
+go run ./main.go --config-file .configs/my-module/go-v0.18.19.json flow 'container-echo --string-arg="foo"'
 ```
 
 OR you can run them one by one:
@@ -64,19 +65,19 @@ OR you can run them one by one:
 - Functions
 
 ```bash
-dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module functions
+dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json functions
 ```
 
 - Develop
 
 ```
-dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module develop 
+dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json develop 
 ```
 
 - Call
 
 ```bash
-dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json --report-dir ./.reports/my-module call 'container-echo --string-arg="foo"'
+dagbenchmark --config-file ./.configs/my-module/go-v0.18.19.json call 'container-echo --string-arg="foo"'
 ```
 
 ### 3. Measure the dev engine
