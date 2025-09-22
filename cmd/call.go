@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"quartz/dagbenchmark.io/config"
+	execwrapper "quartz/dagbenchmark.io/exec-wrapper"
 	"quartz/dagbenchmark.io/sdk"
 	"strings"
 
@@ -30,34 +31,15 @@ var callCmd = &cobra.Command{
 			return err
 		}
 
-		if err := sdk.PruneCache(); err != nil {
-			return fmt.Errorf("failed to prune cache: %w", err)
-		}
-
 		args, err = parseCallArgs(args)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("Executed command: %s\n", strings.Join(args, " "))
-
-		execReport, err := sdk.Call(args).Exec()
-		if err != nil {
-			return err
-		}
-
-		if saveReportDir != "" {
-			if err := execReport.SaveAsCSVAt(saveReportDir); err != nil {
-				return err
-			}
-		}
-
-		fmt.Println(execReport)
-
-		if saveOutputDir != "" {
-			if err := execReport.SaveOutputAt(saveOutputDir); err != nil {
-				return err
-			}
+		if err := run(config, sdk, func() *execwrapper.ExecWrapper {
+			return sdk.Call(args)
+		}); err != nil {
+			return fmt.Errorf("failed to call %s: %w", strings.Join(args, " "), err)
 		}
 
 		return nil

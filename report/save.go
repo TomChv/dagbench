@@ -1,4 +1,4 @@
-package execwrapper
+package report
 
 import (
 	"encoding/csv"
@@ -6,35 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
-	"time"
 )
 
-type ExecReport struct {
-	name string
-
-	stderr string
-
-	values map[string]string
-}
-
-func (r *ExecReport) String() string {
-	var res strings.Builder
-
-	fmt.Fprintf(&res, "Report %s results\n", r.name)
-
-	for k, v := range r.values {
-		fmt.Fprintf(&res, "%s\t: %s\n", k, v)
-	}
-
-	return res.String()
-}
-
-func (r *ExecReport) Stderr() string {
-	return r.stderr
-}
-
-func (r *ExecReport) SaveAsCSVAt(dirpath string) error {
+func (r *Report) SaveAsCSVAt(dirpath string) error {
 	fileName := fmt.Sprintf("%s-results.csv", r.name)
 	absPath, err := filepath.Abs(dirpath)
 	if err != nil {
@@ -62,15 +36,10 @@ func (r *ExecReport) SaveAsCSVAt(dirpath string) error {
 	}
 
 	for k, v := range r.values {
-		parsedDuration, err := time.ParseDuration(v)
-		if err != nil {
-			return fmt.Errorf("failed to parse duration: %w", err)
-		}
-
 		if err := w.Write([]string{
-			k, v,
-			strconv.FormatFloat(parsedDuration.Seconds(), 'f', -1, 64),
-			strconv.FormatInt(parsedDuration.Milliseconds(), 10),
+			k, v.String(),
+			strconv.FormatFloat(v.Seconds(), 'f', -1, 64),
+			strconv.FormatInt(v.Milliseconds(), 10),
 		}); err != nil {
 			return fmt.Errorf("failed to write row: %w", err)
 		}
@@ -81,7 +50,7 @@ func (r *ExecReport) SaveAsCSVAt(dirpath string) error {
 	return nil
 }
 
-func (r *ExecReport) SaveOutputAt(dirpath string) error {
+func (r *Report) SaveOutputAt(dirpath string) error {
 	fileName := fmt.Sprintf("%s-output.txt", r.name)
 	absPath, err := filepath.Abs(dirpath)
 	if err != nil {

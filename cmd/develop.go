@@ -26,27 +26,8 @@ var developCmd = &cobra.Command{
 			return err
 		}
 
-		if err := sdk.PruneCache(); err != nil {
-			return fmt.Errorf("failed to prune cache: %w", err)
-		}
-
-		execReport, err := sdk.Develop().Exec()
-		if err != nil {
-			return err
-		}
-
-		if saveReportDir != "" {
-			if err := execReport.SaveAsCSVAt(saveReportDir); err != nil {
-				return err
-			}
-		}
-
-		fmt.Println(execReport)
-
-		if saveOutputDir != "" {
-			if err := execReport.SaveOutputAt(saveOutputDir); err != nil {
-				return err
-			}
+		if err := run(config, sdk, sdk.Develop); err != nil {
+			return fmt.Errorf("failed to run develop: %w", err)
 		}
 
 		return nil

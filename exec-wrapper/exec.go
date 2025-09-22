@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
+	"quartz/dagbenchmark.io/report"
 	"strings"
 )
 
@@ -21,13 +22,14 @@ func NewExecWrapper(name string, cmd *exec.Cmd, spanMarkers []string) *ExecWrapp
 	}
 }
 
-func (e *ExecWrapper) Exec() (*ExecReport, error) {
-	fmt.Println("Executing", e.name)
+func (e *ExecWrapper) Exec() (*report.Report, error) {
+	fmt.Println("Executing ", e.name)
 
-	report := &ExecReport{
-		name:   e.name,
-		values: make(map[string]string),
-	}
+	return e.exec()
+}
+
+func (e *ExecWrapper) exec() (*report.Report, error) {
+	report := report.New(e.name)
 
 	stderr, err := e.cmd.StderrPipe()
 	if err != nil {
@@ -42,11 +44,16 @@ func (e *ExecWrapper) Exec() (*ExecReport, error) {
 	for scanner.Scan() {
 		line := stripANSI(scanner.Text())
 
-		report.stderr += line + "\n"
+		report.AddStderr(line + "\n")
 
 		for _, marker := range e.spanMarkers {
 			if strings.Contains(line, marker) && strings.Contains(line, "DONE") {
-				report.values[marker] = extractTimeFromTraceLine(line)
+				duration, err := extractTimeFromTraceLine(line)
+				if err != nil {
+					return nil, fmt.Errorf("failed to extract time from trace line: %w", err)
+				}
+
+				report.AddValue(marker, duration)
 
 				break
 			}

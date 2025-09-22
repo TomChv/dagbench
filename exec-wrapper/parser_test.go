@@ -18,11 +18,6 @@ func TestExtractTimeFromTraceLine(t *testing.T) {
 			expected: "1.234s",
 		},
 		{
-			name:     "no match",
-			line:     "message",
-			expected: "?",
-		},
-		{
 			name:     "real case",
 			line:     "ModuleSource.generatedContextDirectory DONE [9.5s]",
 			expected: "9.5s",
@@ -30,13 +25,14 @@ func TestExtractTimeFromTraceLine(t *testing.T) {
 		{
 			name:     "with logged line",
 			line:     "17  : moduleSource DONE [0.2s]",
-			expected: "0.2s",
+			expected: "200ms",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			got := extractTimeFromTraceLine(tt.line)
+			got, err := extractTimeFromTraceLine(tt.line)
 
-			require.Equal(t, tt.expected, got)
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, got.String())
 		})
 	}
 }

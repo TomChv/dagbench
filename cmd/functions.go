@@ -22,34 +22,13 @@ var functionsCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(config)
-
 		sdk, err := sdk.NewSDK(config)
 		if err != nil {
 			return err
 		}
 
-		if err := sdk.PruneCache(); err != nil {
-			return fmt.Errorf("failed to prune cache: %w", err)
-		}
-
-		execReport, err := sdk.Functions().Exec()
-		if err != nil {
-			return err
-		}
-
-		if saveReportDir != "" {
-			if err := execReport.SaveAsCSVAt(saveReportDir); err != nil {
-				return err
-			}
-		}
-
-		fmt.Println(execReport)
-
-		if saveOutputDir != "" {
-			if err := execReport.SaveOutputAt(saveOutputDir); err != nil {
-				return err
-			}
+		if err := run(config, sdk, sdk.Functions); err != nil {
+			return fmt.Errorf("failed to list function: %w", err)
 		}
 
 		return nil
