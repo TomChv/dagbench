@@ -8,4 +8,4 @@ TODO
 
 ## Usage
 
-See the [BENCHMARKS.md](./BENCHMARKS.md) file for a step by step guide on how to benchmark a module.
+TODO

@@ -1,21 +1,14 @@
 package report
 
 import (
-	"encoding/csv"
-	"fmt"
+	"maps"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
-
-	"text/tabwriter"
 )
 
 type Report struct {
-	name string
-
-	stderr string
-
+	name   string
+	output string
 	values map[string]time.Duration
 }
 
@@ -26,69 +19,28 @@ func New(name string) *Report {
 	}
 }
 
-func NewFromCSV(path string) (*Report, error) {
-	name := filepath.Base(path)
+func (r *Report) WithValues(values map[string]time.Duration) *Report {
+	maps.Copy(r.values, values)
 
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read report file: %w", err)
-	}
-
-	csvReader := csv.NewReader(strings.NewReader(string(content)))
-	csvReader.Comma = ';'
-
-	values, err := csvReader.ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse report file: %w", err)
-	}
-
-	values = values[1:]
-
-	report := New(name)
-	for _, row := range values {
-		if len(row) < 2 {
-			return nil, fmt.Errorf("invalid row: %v", row)
-		}
-
-		key := row[0]
-		value, err := time.ParseDuration(row[1])
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse duration: %w", err)
-		}
-
-		report = report.AddValue(key, value)
-	}
-
-	return report, nil
+	return r
 }
 
-func (r *Report) String() string {
-	var b strings.Builder
-
-	fmt.Fprintf(&b, "Report %s\n", r.name)
-	tw := tabwriter.NewWriter(&b, 0, 0, 2, ' ', 0)
-
-	for k, v := range r.values {
-		fmt.Fprintf(tw, "%s\t:\t %s\n", k, v)
-	}
-
-	_ = tw.Flush()
-
-	return b.String()
-}
-
-func (r *Report) Stderr() string {
-	return r.stderr
-}
-
-func (r *Report) AddValue(key string, value time.Duration) *Report {
+func (r *Report) WithValue(key string, value time.Duration) *Report {
 	r.values[key] = value
 
 	return r
 }
 
-func (r *Report) AddStderr(stderr string) *Report {
-	r.stderr += stderr
+func (r *Report) WithOutput(output string) *Report {
+	r.output = output
 
 	return r
+}
+
+func (r *Report) HasOutput() bool {
+	return r.output != ""
+}
+
+func (r *Report) SaveOutput(path string) error {
+	return os.WriteFile(path, []byte(r.output), 0644)
 }

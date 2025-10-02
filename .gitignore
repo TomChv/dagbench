@@ -6,4 +6,5 @@
 
 .envrc
 .DS_Store
-dagbenchmark
+dagbench
+.archive

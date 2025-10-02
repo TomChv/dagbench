@@ -1,4 +1,4 @@
-package execwrapper
+package hook
 
 import (
 	"testing"

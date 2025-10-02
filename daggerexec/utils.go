@@ -1,9 +1,16 @@
-package sdk
+package daggerexec
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 )
+
+func stripANSI(s string) string {
+	var ansi = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`) // CSI sequences
+
+	return ansi.ReplaceAllString(s, "")
+}
 
 func convertFunctionNameToTraceMarker(s string) string {
 	s = strings.ReplaceAll(s, "-", " ")

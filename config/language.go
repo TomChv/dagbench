@@ -13,7 +13,7 @@ func (l Language) String() string {
 	return string(l)
 }
 
-func stringToLanguage(s string) (Language, error) {
+func StringToLanguage(s string) (Language, error) {
 	switch s {
 	case "go":
 		return Go, nil

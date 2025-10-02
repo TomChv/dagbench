@@ -1,9 +1,14 @@
 package main
 
-import "quartz/dagbenchmark.io/cmd"
+import (
+	"fmt"
+	"os"
+	"quartz/dagbench.io/cmd"
+)
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
