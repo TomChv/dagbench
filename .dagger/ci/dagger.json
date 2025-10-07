@@ -1,0 +1,9 @@
+{
+  "name": "dagbench-ci",
+  "engineVersion": "v0.19.0",
+  "blueprint": {
+    "name": "go",
+    "source": "github.com/dagger/dagger/modules/go@main",
+    "pin": "5b07b0b4b4208b5009866e7219a72d0957213c44"
+  }
+}

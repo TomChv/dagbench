@@ -19,10 +19,7 @@ func NewFromFile(path string) (*Config, error) {
 
 	// Get the format from the file extension
 	ext := filepath.Ext(path)
-	format, err := StringToFormat(strings.TrimPrefix(ext, "."))
-	if err != nil {
-		return nil, fmt.Errorf("failed to get format from file extension: %w", err)
-	}
+	format := Format(strings.TrimPrefix(ext, "."))
 
 	// Unmarshal the content to the Config struct
 	var c Config

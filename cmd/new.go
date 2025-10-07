@@ -2,79 +2,86 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"quartz/dagbench.io/benchmark/recipe"
 	"quartz/dagbench.io/config"
 
 	"github.com/spf13/cobra"
 )
 
 var (
-	sdk         string
-	bin         string
-	workdir     string
-	templatedir string
-	format      string
-	disableInit bool
-	useCloud    bool
+	format     string
+	initRecipe string
 )
 
 var newCmd = &cobra.Command{
-	Use:   "new [name]",
-	Args:  cobra.ExactArgs(1),
-	Short: "initialiaze a new dagger benchmark configuration",
+	Use:   "new",
+	Short: "Create a new benchmark configuration",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		format, err := config.StringToFormat(format)
-		if err != nil {
-			return fmt.Errorf("failed to parse --format argument: %w", err)
+		configOpts := []config.ConfigOptFunc{}
+
+		if autoInit {
+			if moduleName == "" {
+				moduleName = name
+			}
+
+			configOpts = append(configOpts, config.WithInit(moduleName, sdk, templateDir))
 		}
 
-		// Create config
-		configOpts := []config.ConfigOptFunc{
-			config.WithWorkdir(workdir),
-			config.WithTemplateDir(templatedir),
-		}
-
-		if disableInit {
-			configOpts = append(configOpts, config.DisableInit())
+		if module != "" {
+			configOpts = append(configOpts, config.WithModule(module))
 		}
 
 		if useCloud {
 			configOpts = append(configOpts, config.EnableCloud())
 		}
 
-		name := args[0]
-		conf, err := config.New(name, sdk, bin, configOpts...)
-		if err != nil {
-			return fmt.Errorf("failed to create configuration: %w", err)
+		configuration := config.New(name, daggerBin, 10, configOpts...)
+
+		if initRecipe != "" {
+			configuration.Commands = recipe.Get(recipe.Recipe(initRecipe))
 		}
 
-		// Save config
-		workdir, err := os.Getwd()
-		if err != nil {
-			return fmt.Errorf("failed to get workdir: %w", err)
+		if autoInit {
+			configuration.Workdir = ""
 		}
 
-		configPath, err := conf.Save(workdir, format)
-		if err != nil {
-			return err
+		if err := configuration.Verify(); err != nil {
+			return fmt.Errorf("failed to verify configuration: %w", err)
 		}
 
-		fmt.Printf("Config saved at %s\n", configPath)
+		path, err := configuration.Save(outputPath, config.Format(format))
+		if err != nil {
+			return fmt.Errorf("failed to save configuration: %w", err)
+		}
+
+		fmt.Printf("Configuration saved to %s\n", path)
 
 		return nil
 	},
 }
 
 func init() {
-	newCmd.Flags().StringVar(&sdk, "sdk", "", "Language to use for benchmark")
-	newCmd.Flags().StringVar(&bin, "bin", "dagger", "Name of the dagger binary")
-	newCmd.Flags().StringVar(&workdir, "workdir", "", "Working directory for the benchmark")
-	newCmd.Flags().StringVar(&templatedir, "templatedir", "", "Template directory for the benchmark")
-	newCmd.Flags().StringVarP(&format, "format", "f", "yaml", "Format to save the config in")
-	newCmd.Flags().BoolVar(&disableInit, "disable-init", false, "Disable the init command")
+	// Common flag
+	newCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the benchmark")
+	newCmd.Flags().StringVarP(&daggerBin, "dagger-bin", "d", "dagger", "Dagger binary to use")
+	newCmd.Flags().StringVarP(&outputPath, "output", "o", ".", "Output directory for the configuration")
+	newCmd.Flags().StringVar(&format, "format", "json", "Output format for the configuration")
+	newCmd.Flags().StringVarP(&initRecipe, "recipe", "r", "", "Recipe to use for the benchmark (available recipes: sdk)")
+
+	// Run flag
 	newCmd.Flags().BoolVar(&useCloud, "use-cloud", false, "If enable, --cloud will be set")
 
-	if err := newCmd.MarkFlagRequired("sdk"); err != nil {
+	// Init flag
+	newCmd.Flags().BoolVar(&autoInit, "auto-init", false, "Automatically init the module using provided flags")
+	newCmd.Flags().StringVar(&moduleName, "module-name", "", "Name of the module to init")
+	newCmd.Flags().StringVar(&workdir, "workdir", "", "Working directory for the benchmark")
+	newCmd.Flags().StringVar(&sdk, "sdk", "", "Language to use for benchmark")
+	newCmd.Flags().StringVar(&templateDir, "template-dir", "", "Template directory for the benchmark")
+
+	// Module flag
+	newCmd.Flags().StringVarP(&module, "module", "m", "", "Module to use for the benchmark")
+
+	if err := newCmd.MarkFlagRequired("name"); err != nil {
 		panic(err)
 	}
 }

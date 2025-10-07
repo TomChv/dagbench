@@ -2,33 +2,39 @@ package config
 
 type ConfigOptFunc func(config *Config)
 
-// WithWorkdir sets the workdir for the config
-func WithWorkdir(workdir string) ConfigOptFunc {
+func WithInit(name, sdk, templateDir string) ConfigOptFunc {
 	return func(config *Config) {
-		config.Workdir = workdir
+		config.Init = &Init{
+			Name:        name,
+			SDK:         sdk,
+			TemplateDir: templateDir,
+		}
 	}
 }
 
-func WithTemplateDir(templateDir string) ConfigOptFunc {
+func WithModule(module string) ConfigOptFunc {
 	return func(config *Config) {
-		config.TemplateDir = templateDir
-	}
-}
-
-func WithCommands(commands map[string][]string) ConfigOptFunc {
-	return func(config *Config) {
-		config.Commands = commands
-	}
-}
-
-func DisableInit() ConfigOptFunc {
-	return func(config *Config) {
-		config.RunInit = false
+		config.Module = module
 	}
 }
 
 func EnableCloud() ConfigOptFunc {
 	return func(config *Config) {
 		config.Cloud = true
+	}
+}
+
+func WithCommand(spanNames []string, args []string) ConfigOptFunc {
+	return func(config *Config) {
+		config.Commands = append(config.Commands, &Command{
+			SpanNames: spanNames,
+			Args:      args,
+		})
+	}
+}
+
+func EnableDebug() ConfigOptFunc {
+	return func(config *Config) {
+		config.debug = true
 	}
 }

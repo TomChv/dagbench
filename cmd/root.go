@@ -1,6 +1,8 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "dagbench",
@@ -12,6 +14,6 @@ func Execute() error {
 }
 
 func init() {
+	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(newCmd)
-	rootCmd.AddCommand(benchCmd)
 }

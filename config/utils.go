@@ -6,25 +6,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-)
 
-const (
-	DefaultBinPath = "dagger"
-	DefaultOutDir  = "./dagbench-out"
+	"github.com/google/uuid"
 )
-
-var defaultCommands = map[string][]string{
-	"functions": {},
-	"develop":   {},
-	"default-call": {
-		"call",
-		"container-echo",
-		"--string-arg=foo",
-	},
-}
 
 func generateDefaultWorkdir(name string) string {
-	return filepath.Join(os.TempDir(), "dagbench-workdir", name)
+	return filepath.Join(os.TempDir(), "dagbench-workdir", name, uuid.NewString())
 }
 
 func getDaggerVersion(binPath string) (string, error) {
