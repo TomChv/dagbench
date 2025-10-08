@@ -20,10 +20,17 @@ func New(
 	}
 }
 
-func (d *Dagbench) Bin(ctx context.Context) (*dagger.File, error) {
-	platform, err := dag.DefaultPlatform(ctx)
-	if err != nil {
-		return nil, err
+func (d *Dagbench) Bin(
+	ctx context.Context,
+
+	//+optional
+	platform dagger.Platform,
+) (_ *dagger.File, err error) {
+	if platform == "" {
+		platform, err = dag.DefaultPlatform(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return dag.
@@ -38,8 +45,11 @@ func (d *Dagbench) CLI(
 
 	//+default="main"
 	daggerVersion string,
+
+	//+optional
+	platform dagger.Platform,
 ) (*CLI, error) {
-	binary, err := d.Bin(ctx)
+	binary, err := d.Bin(ctx, platform)
 	if err != nil {
 		return nil, err
 	}

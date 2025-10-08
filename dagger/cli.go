@@ -75,7 +75,6 @@ func (c *Command) PruneCache() error {
 	cmd := exec.Command(c.bin, "core", "engine", "local-cache", "prune")
 
 	return cmd.Run()
-
 }
 
 func (c *Command) Init(moduleName string, sdk string, hooks ...hook.Hook) error {

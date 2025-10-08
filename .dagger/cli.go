@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"dagger/dagbench/internal/dagger"
@@ -47,20 +46,6 @@ func newCLI(binary *dagger.File, daggerVersion string) (*CLI, error) {
 	}, nil
 }
 
-func (c *CLI) New(
-	//+default="bench"
-	name string,
-
-	//+default="go"
-	sdk string,
-
-	//+default="json"
-	format string,
-) *dagger.File {
-	return c.Ctr.
-		WithExec(
-			[]string{"new", name, "--sdk", sdk, "--format", format},
-			dagger.ContainerWithExecOpts{UseEntrypoint: true},
-		).
-		File(fmt.Sprintf("%s.%s", name, format))
+func (c *CLI) Container() *dagger.Container {
+	return c.Ctr
 }
