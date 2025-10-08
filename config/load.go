@@ -33,7 +33,7 @@ func NewFromFile(path string) (*Config, error) {
 			return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 		}
 	default:
-		return nil, fmt.Errorf("unsupported file extension: %s", ext)
+		return nil, UnsupportedExtensionError(ext)
 	}
 
 	return &c, nil

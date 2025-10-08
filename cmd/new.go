@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"quartz/dagbench.io/benchmark/recipe"
 	"quartz/dagbench.io/config"
 
@@ -18,8 +17,8 @@ var (
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Create a new benchmark configuration",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		configOpts := []config.ConfigOptFunc{}
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		configOpts := []config.OptFunc{}
 
 		if autoInit {
 			if moduleName == "" {
@@ -43,7 +42,8 @@ var newCmd = &cobra.Command{
 			configuration.Commands = recipe.Get(recipe.Recipe(initRecipe))
 		}
 
-		if err := configuration.Verify(); err != nil {
+		ctx := cmd.Context()
+		if err := configuration.Verify(ctx); err != nil {
 			return fmt.Errorf("failed to verify configuration: %w", err)
 		}
 
@@ -68,17 +68,20 @@ func init() {
 	newCmd.Flags().StringVarP(&daggerBin, "dagger-bin", "d", "dagger", "Dagger binary to use")
 	newCmd.Flags().StringVarP(&outDir, "output", "o", ".", "Output directory for the configuration")
 	newCmd.Flags().StringVar(&format, "format", "json", "Output format for the configuration")
-	newCmd.Flags().StringVarP(&initRecipe, "recipe", "r", "", "Recipe to use for the benchmark (available recipes: sdk)")
+	newCmd.Flags().
+		StringVarP(&initRecipe, "recipe", "r", "", "Recipe to use for the benchmark (available recipes: sdk)")
 
 	// Run flag
 	newCmd.Flags().BoolVar(&useCloud, "use-cloud", false, "If enable, --cloud will be set")
 
 	// Init flag
-	newCmd.Flags().BoolVar(&autoInit, "auto-init", false, "Automatically init the module using provided flags")
+	newCmd.Flags().
+		BoolVar(&autoInit, "auto-init", false, "Automatically init the module using provided flags")
 	newCmd.Flags().StringVar(&moduleName, "module-name", "", "Name of the module to init")
 	newCmd.Flags().StringVar(&workdir, "workdir", "", "Working directory for the benchmark")
 	newCmd.Flags().StringVar(&sdk, "sdk", "", "Language to use for benchmark")
-	newCmd.Flags().StringVar(&templateDir, "template-dir", "", "Template directory for the benchmark")
+	newCmd.Flags().
+		StringVar(&templateDir, "template-dir", "", "Template directory for the benchmark")
 
 	// Module flag
 	newCmd.Flags().StringVarP(&module, "module", "m", "", "Module to use for the benchmark")

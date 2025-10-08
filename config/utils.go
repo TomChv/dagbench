@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -14,8 +15,8 @@ func generateDefaultWorkdir(name string) string {
 	return filepath.Join(os.TempDir(), "dagbench-workdir", name, uuid.NewString())
 }
 
-func getDaggerVersion(binPath string) (string, error) {
-	version, err := exec.Command(binPath, "version").Output()
+func getDaggerVersion(ctx context.Context, binPath string) (string, error) {
+	version, err := exec.CommandContext(ctx, binPath, "version").Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to execute dagger version: %w", err)
 	}

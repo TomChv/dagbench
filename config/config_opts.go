@@ -1,8 +1,10 @@
 package config
 
-type ConfigOptFunc func(config *Config)
+// OptFunc is a function that modifies a Config.
+type OptFunc func(config *Config)
 
-func WithInit(name, sdk, templateDir string) ConfigOptFunc {
+// WithInit sets the init command of the config.
+func WithInit(name, sdk, templateDir string) OptFunc {
 	return func(config *Config) {
 		config.Init = &Init{
 			Name:        name,
@@ -12,19 +14,22 @@ func WithInit(name, sdk, templateDir string) ConfigOptFunc {
 	}
 }
 
-func WithModule(module string) ConfigOptFunc {
+// WithModule sets the module of the config.
+func WithModule(module string) OptFunc {
 	return func(config *Config) {
 		config.Module = module
 	}
 }
 
-func EnableCloud() ConfigOptFunc {
+// EnableCloud enables the cloud mode of the config.
+func EnableCloud() OptFunc {
 	return func(config *Config) {
 		config.Cloud = true
 	}
 }
 
-func WithCommand(spanNames []string, args []string) ConfigOptFunc {
+// WithCommand sets the command of the config.
+func WithCommand(spanNames []string, args []string) OptFunc {
 	return func(config *Config) {
 		config.Commands = append(config.Commands, &Command{
 			SpanNames: spanNames,
@@ -33,7 +38,8 @@ func WithCommand(spanNames []string, args []string) ConfigOptFunc {
 	}
 }
 
-func EnableDebug() ConfigOptFunc {
+// EnableDebug enables the debug mode of the config.
+func EnableDebug() OptFunc {
 	return func(config *Config) {
 		config.debug = true
 	}

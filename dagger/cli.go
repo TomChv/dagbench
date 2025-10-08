@@ -2,9 +2,9 @@ package dagger
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os/exec"
-
 	"quartz/dagbench.io/config"
 	"quartz/dagbench.io/hook"
 )
@@ -33,8 +33,8 @@ func NewCLI(conf *config.Config) *Command {
 	}
 }
 
-func (c *Command) Exec(args []string, hooks ...hook.Hook) error {
-	cmd := exec.Command(c.bin, append(c.args, args...)...)
+func (c *Command) Exec(ctx context.Context, args []string, hooks ...hook.Hook) error {
+	cmd := exec.CommandContext(ctx, c.bin, append(c.args, args...)...)
 
 	if c.workdir != "" {
 		cmd.Dir = c.workdir
@@ -71,14 +71,20 @@ func (c *Command) Exec(args []string, hooks ...hook.Hook) error {
 	return nil
 }
 
-func (c *Command) PruneCache() error {
-	cmd := exec.Command(c.bin, "core", "engine", "local-cache", "prune")
+func (c *Command) PruneCache(ctx context.Context) error {
+	cmd := exec.CommandContext(ctx, c.bin, "core", "engine", "local-cache", "prune")
 
 	return cmd.Run()
 }
 
-func (c *Command) Init(moduleName string, sdk string, hooks ...hook.Hook) error {
+func (c *Command) Init(
+	ctx context.Context,
+	moduleName string,
+	sdk string,
+	hooks ...hook.Hook,
+) error {
 	return c.Exec(
+		ctx,
 		[]string{"init", "--sdk", sdk, "--source=.", "--name", moduleName},
 		hooks...,
 	)

@@ -13,6 +13,7 @@ type Result []map[string]time.Duration
 
 type Metadata map[string]string
 
+// GoBenchFormat returns the result in the gobench format.
 func (r *Result) GoBenchFormat(name string, metadatas Metadata) string {
 	var content strings.Builder
 

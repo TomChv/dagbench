@@ -14,7 +14,7 @@ func (c *Config) Save(dirpath string, format Format) (string, error) {
 	path := filepath.Join(dirpath, fmt.Sprintf("%s.%s", c.Name, format))
 
 	// Create the directory if it doesn't exist and open file
-	if err := os.MkdirAll(filepath.Dir(dirpath), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dirpath), 0o750); err != nil {
 		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
 
@@ -22,7 +22,7 @@ func (c *Config) Save(dirpath string, format Format) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to create file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Marshal the config to the appropriate format
 	var content []byte
@@ -38,7 +38,7 @@ func (c *Config) Save(dirpath string, format Format) (string, error) {
 			return "", fmt.Errorf("failed to marshal config to yaml: %w", err)
 		}
 	default:
-		return "", fmt.Errorf("unsupported format: %s", format)
+		return "", UnsupportedFormatError(format)
 	}
 
 	// Write the marshaled config to the file

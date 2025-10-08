@@ -7,6 +7,8 @@ import (
 )
 
 func TestExtractTimeFromTraceLine(t *testing.T) {
+	t.Parallel()
+
 	for _, tt := range []struct {
 		name     string
 		line     string
@@ -29,6 +31,8 @@ func TestExtractTimeFromTraceLine(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := extractTimeFromTraceLine(tt.line)
 
 			require.NoError(t, err)

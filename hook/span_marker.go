@@ -50,5 +50,5 @@ func extractTimeFromTraceLine(line string) (time.Duration, error) {
 		return time.ParseDuration(match[1])
 	}
 
-	return time.Duration(0), fmt.Errorf("failed to extract time from trace line: %s", line)
+	return time.Duration(0), ExtractDurationFromTraceError(line)
 }

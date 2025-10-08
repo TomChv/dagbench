@@ -3,10 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
-
 	"quartz/dagbench.io/benchmark"
 	"quartz/dagbench.io/config"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -43,7 +42,9 @@ var (
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run a dagger benchmark",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		ctx := cmd.Context()
+
 		var configuration *config.Config
 		if configFile != "" {
 			conf, err := configFromFile()
@@ -56,13 +57,17 @@ var runCmd = &cobra.Command{
 			configuration = configFromFlag()
 		}
 
-		if err := configuration.Verify(); err != nil {
+		if err := configuration.Verify(ctx); err != nil {
 			return fmt.Errorf("failed to verify configuration: %w", err)
 		}
 
-		fmt.Printf("Running benchmark %s with %d iterations\n\n", configuration.Name, configuration.Iteration)
+		fmt.Printf(
+			"Running benchmark %s with %d iterations\n\n",
+			configuration.Name,
+			configuration.Iteration,
+		)
 
-		result, err := benchmark.Run(configuration)
+		result, err := benchmark.Run(ctx, configuration)
 		if err != nil {
 			return fmt.Errorf("failed to run benchmark: %w", err)
 		}
@@ -70,7 +75,7 @@ var runCmd = &cobra.Command{
 		fmtResult := result.GoBenchFormat(configuration.Name, configuration.Metadatas())
 		fmt.Printf("\nBenchmark result:\n%s\n", fmtResult)
 
-		if err := os.WriteFile(outputPath, []byte(fmtResult), 0o644); err != nil {
+		if err := os.WriteFile(outputPath, []byte(fmtResult), 0o600); err != nil {
 			return fmt.Errorf("failed to write output file: %w", err)
 		}
 
@@ -80,6 +85,7 @@ var runCmd = &cobra.Command{
 	},
 }
 
+//nolint:cyclop
 func configFromFile() (*config.Config, error) {
 	conf, err := config.NewFromFile(configFile)
 	if err != nil {
@@ -132,7 +138,7 @@ func configFromFile() (*config.Config, error) {
 }
 
 func configFromFlag() *config.Config {
-	configOpts := []config.ConfigOptFunc{
+	configOpts := []config.OptFunc{
 		config.WithCommand([]string{spanName}, strings.Split(command, " ")),
 	}
 
@@ -175,11 +181,13 @@ func init() {
 	runCmd.Flags().BoolVar(&useCloud, "use-cloud", false, "If enable, --cloud will be set")
 
 	// Init flag
-	runCmd.Flags().BoolVar(&autoInit, "auto-init", false, "Automatically init the module using provided flags")
+	runCmd.Flags().
+		BoolVar(&autoInit, "auto-init", false, "Automatically init the module using provided flags")
 	runCmd.Flags().StringVar(&moduleName, "module-name", "", "Name of the module to init")
 	runCmd.Flags().StringVar(&workdir, "workdir", "", "Working directory for the benchmark")
 	runCmd.Flags().StringVar(&sdk, "sdk", "", "Language to use for benchmark")
-	runCmd.Flags().StringVar(&templateDir, "template-dir", "", "Template directory for the benchmark")
+	runCmd.Flags().
+		StringVar(&templateDir, "template-dir", "", "Template directory for the benchmark")
 
 	// Module flag
 	runCmd.Flags().StringVarP(&module, "module", "m", "", "Module to use for the benchmark")
