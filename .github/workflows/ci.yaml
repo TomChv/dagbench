@@ -40,8 +40,11 @@ jobs:
         uses: dagger/dagger-for-github@v8.2.0
         with:
           version: "v0.19.2"
-          args: --cloud -c 'bin --platform linux/amd64 | export dagbench'
+          verb: shell
+          args: bin --platform linux/amd64 | export dagbench
+          dagger-flags: --cloud
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          enable-github-summary: true
 
       - name: Run dagbench help
         run: dagbench --help
