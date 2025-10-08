@@ -108,14 +108,14 @@ func (c *Config) Verify() error {
 	if c.Workdir == "" && c.DoAutoInit() {
 		c.Workdir = generateDefaultWorkdir(c.Name)
 
-		if err := os.MkdirAll(c.Workdir, 0755); err != nil {
+		if err := os.MkdirAll(c.Workdir, 0o755); err != nil {
 			return fmt.Errorf("failed to create default workdir: %w", err)
 		}
 	}
 
 	// Enable debug logs
 	if c.debug {
-		_ = os.MkdirAll(c.DebugDir(), 0755)
+		_ = os.MkdirAll(c.DebugDir(), 0o755)
 	}
 
 	return nil

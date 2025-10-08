@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
+
 	"quartz/dagbench.io/config"
 	"quartz/dagbench.io/hook"
 )
@@ -34,7 +35,10 @@ func NewCLI(conf *config.Config) *Command {
 
 func (c *Command) Exec(args []string, hooks ...hook.Hook) error {
 	cmd := exec.Command(c.bin, append(c.args, args...)...)
-	cmd.Dir = c.workdir
+
+	if c.workdir != "" {
+		cmd.Dir = c.workdir
+	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
@@ -68,7 +72,10 @@ func (c *Command) Exec(args []string, hooks ...hook.Hook) error {
 }
 
 func (c *Command) PruneCache() error {
-	return c.Exec([]string{"core", "engine", "local-cache", "prune"})
+	cmd := exec.Command(c.bin, "core", "engine", "local-cache", "prune")
+
+	return cmd.Run()
+
 }
 
 func (c *Command) Init(moduleName string, sdk string, hooks ...hook.Hook) error {

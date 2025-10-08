@@ -1,9 +1,10 @@
 package main
 
 import (
-	"dagger/dagbench/internal/dagger"
 	"fmt"
 	"strings"
+
+	"dagger/dagbench/internal/dagger"
 )
 
 type CLI struct {

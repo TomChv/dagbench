@@ -14,7 +14,7 @@ func (c *Config) Save(dirpath string, format Format) (string, error) {
 	path := filepath.Join(dirpath, fmt.Sprintf("%s.%s", c.Name, format))
 
 	// Create the directory if it doesn't exist and open file
-	if err := os.MkdirAll(filepath.Dir(dirpath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dirpath), 0o755); err != nil {
 		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
 

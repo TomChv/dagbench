@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/otiai10/copy"
 
@@ -26,8 +25,15 @@ func Run(conf *config.Config) (*Result, error) {
 			return nil, fmt.Errorf("failed to prune cache: %w", err)
 		}
 
-		if err := daggerCLI.Init(conf.Init.Name, conf.Init.SDK); err != nil {
-			return nil, fmt.Errorf("failed to init: %w", err)
+		outputHook := hook.NewCaptureOutput()
+		if err := daggerCLI.Init(conf.Init.Name, conf.Init.SDK, outputHook); err != nil {
+			errorReportPath := filepath.Join(conf.DebugDir(), "error-auto-init")
+
+			if rerr := os.WriteFile(errorReportPath, []byte(outputHook.Output()), 0o644); rerr != nil {
+				return nil, fmt.Errorf("failed to init dagger: %w", err)
+			}
+
+			return nil, fmt.Errorf("failed to init dagger: %w\nwriting error report to %s", err, errorReportPath)
 		}
 
 		if conf.Init.TemplateDir != "" {
@@ -57,9 +63,9 @@ func Run(conf *config.Config) (*Result, error) {
 			err := daggerCLI.Exec(cmd.Args, spanHook, outputHook)
 			cmdDuration := time.Since(cmdStart)
 			if err != nil {
-				errorReportPath := filepath.Join("/tmp", "dagbench-report", uuid.NewString(), "error.txt")
+				errorReportPath := filepath.Join(conf.DebugDir(), fmt.Sprintf("error-%s-%d.txt", cmd.Args[0], i))
 
-				if rerr := os.WriteFile(errorReportPath, []byte(outputHook.Output()), 0644); rerr != nil {
+				if rerr := os.WriteFile(errorReportPath, []byte(outputHook.Output()), 0o644); rerr != nil {
 					return nil, fmt.Errorf("failed to execute dagger: %w", err)
 				}
 
@@ -68,7 +74,7 @@ func Run(conf *config.Config) (*Result, error) {
 
 			if conf.IsDebug() {
 				outputPath := filepath.Join(conf.DebugDir(), fmt.Sprintf("output-%s-%d.txt", cmd.Args[0], i))
-				_ = os.WriteFile(outputPath, []byte(outputHook.Output()), 0644)
+				_ = os.WriteFile(outputPath, []byte(outputHook.Output()), 0o644)
 			}
 
 			var inlineRes strings.Builder

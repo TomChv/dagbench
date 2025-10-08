@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
+
 	"quartz/dagbench.io/benchmark"
 	"quartz/dagbench.io/config"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -69,7 +70,7 @@ var runCmd = &cobra.Command{
 		fmtResult := result.GoBenchFormat(configuration.Name, configuration.Metadatas())
 		fmt.Printf("\nBenchmark result:\n%s\n", fmtResult)
 
-		if err := os.WriteFile(outputPath, []byte(fmtResult), 0644); err != nil {
+		if err := os.WriteFile(outputPath, []byte(fmtResult), 0o644); err != nil {
 			return fmt.Errorf("failed to write output file: %w", err)
 		}
 

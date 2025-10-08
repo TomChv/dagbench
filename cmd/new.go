@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"quartz/dagbench.io/benchmark/recipe"
 	"quartz/dagbench.io/config"
 
@@ -11,6 +12,7 @@ import (
 var (
 	format     string
 	initRecipe string
+	outDir     string
 )
 
 var newCmd = &cobra.Command{
@@ -41,15 +43,15 @@ var newCmd = &cobra.Command{
 			configuration.Commands = recipe.Get(recipe.Recipe(initRecipe))
 		}
 
-		if autoInit {
-			configuration.Workdir = ""
-		}
-
 		if err := configuration.Verify(); err != nil {
 			return fmt.Errorf("failed to verify configuration: %w", err)
 		}
 
-		path, err := configuration.Save(outputPath, config.Format(format))
+		if autoInit {
+			configuration.Workdir = ""
+		}
+
+		path, err := configuration.Save(outDir, config.Format(format))
 		if err != nil {
 			return fmt.Errorf("failed to save configuration: %w", err)
 		}
@@ -64,7 +66,7 @@ func init() {
 	// Common flag
 	newCmd.Flags().StringVarP(&name, "name", "n", "", "Name of the benchmark")
 	newCmd.Flags().StringVarP(&daggerBin, "dagger-bin", "d", "dagger", "Dagger binary to use")
-	newCmd.Flags().StringVarP(&outputPath, "output", "o", ".", "Output directory for the configuration")
+	newCmd.Flags().StringVarP(&outDir, "output", "o", ".", "Output directory for the configuration")
 	newCmd.Flags().StringVar(&format, "format", "json", "Output format for the configuration")
 	newCmd.Flags().StringVarP(&initRecipe, "recipe", "r", "", "Recipe to use for the benchmark (available recipes: sdk)")
 

@@ -5,7 +5,7 @@ import (
 )
 
 func stripANSI(s string) string {
-	var ansi = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`) // CSI sequences
+	ansi := regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`) // CSI sequences
 
 	return ansi.ReplaceAllString(s, "")
 }
