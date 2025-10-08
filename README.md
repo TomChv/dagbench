@@ -6,11 +6,14 @@ A CLI tool to benchmark dagger modules.
 
 TODO
 
-## CI
-
-TODO
-
 ## Usage
+
+`dagbench` produces a go benchmark report compatible with [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat) so you
+can compare outputs.
+
+See [examples](#examples) for more details on how to produce these report using `dagbench`.
+
+## CLI
 
 ```
 Run a dagger benchmark
@@ -146,5 +149,6 @@ For example, let's run the same benchmark but with the TypeScript SDK.
 dagbench run --config example.json -i 2 --sdk typescript
 ```
 
+## CI
 
-
+TODO
