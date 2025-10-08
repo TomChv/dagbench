@@ -4,7 +4,17 @@ A CLI tool to benchmark dagger modules.
 
 ## Installation
 
-TODO
+You can either install the binary using the `dagger module`
+
+```shell
+dagger -m github.com/TomChv/dagbenchmark -c 'bin | export dagbench'
+```
+
+Or directly use the `dagbench` inside the CLI container.
+
+```shell
+dagger -m -m github.com/TomChv/dagbenchmark -c 'cli | container | terminal' 
+```
 
 ## Usage
 
@@ -12,6 +22,16 @@ TODO
 can compare outputs.
 
 See [examples](#examples) for more details on how to produce these report using `dagbench`.
+
+`dagbench` measure the duration of a specific span and the total duration of the given command.
+
+Example of a benchmark line for the command `"functions"` with the measure span named `"load module"`:
+
+```
+BenchmarkExample/functions/loadModule   1  20.7 s/op
+BenchmarkExample/functions/cmdDuration  1  21.6 s/op
+```
+
 
 ## CLI
 
