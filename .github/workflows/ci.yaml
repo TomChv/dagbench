@@ -45,4 +45,4 @@ jobs:
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
       - name: Run dagbench help
-        run: dagbench --help
+        run: ./dagbench --help
