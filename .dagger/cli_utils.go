@@ -1,8 +1,9 @@
 package main
 
 import (
-	"dagger/dagbench/internal/dagger"
 	"strings"
+
+	"dagger/dagbench/internal/dagger"
 )
 
 func fetchSourceFromGit(daggerVersion string) *dagger.Directory {

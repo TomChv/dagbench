@@ -7,22 +7,23 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func testBasic(ctx context.Context, cli *dagger.DagbenchCli) error {
+func testBasic(ctx context.Context, ctr *dagger.Container) error {
 	eg, gctx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error { return testBasicRunFromCLI(gctx, cli) })
-	eg.Go(func() error { return testBasicRunFromConfigFile(gctx, cli) })
-	eg.Go(func() error { return testBasicRunFromExistingModule(gctx, cli) })
+	eg.Go(func() error { return testBasicRunFromctr(gctx, ctr) })
+	eg.Go(func() error { return testBasicRunFromConfigFile(gctx, ctr) })
+	eg.Go(func() error { return testBasicRunFromExistingModule(gctx, ctr) })
+	eg.Go(func() error { return testBasicRunWithTemplate(gctx, ctr) })
+	eg.Go(func() error { return testBasicRunWithWorkdirAndCleanup(gctx, ctr) })
 
 	return eg.Wait()
 }
 
-func testBasicRunFromCLI(ctx context.Context, cli *dagger.DagbenchCli) error {
-	ctx, span := Tracer().Start(ctx, "test run from CLI flag")
+func testBasicRunFromctr(ctx context.Context, ctr *dagger.Container) error {
+	ctx, span := Tracer().Start(ctx, "test run from ctr flag")
 	defer span.End()
 
-	_, err := cli.
-		Container().
+	_, err := ctr.
 		WithExec(
 			[]string{
 				"run",
@@ -41,12 +42,11 @@ func testBasicRunFromCLI(ctx context.Context, cli *dagger.DagbenchCli) error {
 	return err
 }
 
-func testBasicRunFromConfigFile(ctx context.Context, cli *dagger.DagbenchCli) error {
+func testBasicRunFromConfigFile(ctx context.Context, ctr *dagger.Container) error {
 	ctx, span := Tracer().Start(ctx, "test run from config file")
 	defer span.End()
 
-	configFile := cli.
-		Container().
+	configFile := ctr.
 		WithExec(
 			[]string{"new", "--name", "test", "--sdk", "go", "--recipe", "sdk", "--auto-init"},
 			dagger.ContainerWithExecOpts{
@@ -54,8 +54,7 @@ func testBasicRunFromConfigFile(ctx context.Context, cli *dagger.DagbenchCli) er
 			}).
 		File("test.json")
 
-	_, err := cli.
-		Container().
+	_, err := ctr.
 		WithFile("test.json", configFile).
 		WithExec(
 			[]string{"run", "--config", "test.json", "-i", "2", "-o", "test.txt"},
@@ -68,12 +67,11 @@ func testBasicRunFromConfigFile(ctx context.Context, cli *dagger.DagbenchCli) er
 	return err
 }
 
-func testBasicRunFromExistingModule(ctx context.Context, cli *dagger.DagbenchCli) error {
+func testBasicRunFromExistingModule(ctx context.Context, ctr *dagger.Container) error {
 	ctx, span := Tracer().Start(ctx, "test run from existing module")
 	defer span.End()
 
-	_, err := cli.
-		Container().
+	_, err := ctr.
 		WithWorkdir("/test-module").
 		WithExec([]string{"dagger", "init", "--sdk=go", "--name=test", "--source=."}).
 		WithExec(
@@ -81,6 +79,63 @@ func testBasicRunFromExistingModule(ctx context.Context, cli *dagger.DagbenchCli
 				"run", "-m", ".", "-i", "2", "--name", "test",
 				"--command", "call container-echo --string-arg=hello",
 				"--span", "containerEcho",
+				"-o", "test.txt",
+			},
+			dagger.ContainerWithExecOpts{
+				UseEntrypoint: true,
+			}).
+		File("test.txt").
+		Contents(ctx)
+
+	return err
+}
+
+func testBasicRunWithTemplate(ctx context.Context, ctr *dagger.Container) error {
+	ctx, span := Tracer().Start(ctx, "test run with template")
+	defer span.End()
+
+	_, err := ctr.
+		WithDirectory(
+			"/template",
+			dag.Directory().WithNewFile("main.go",
+				`package main
+
+type Test struct{}
+
+func (t *Test) Foo() string {
+  return "Foo"
+}`),
+		).
+		WithExec(
+			[]string{
+				"run",
+				"--name", "test", "--auto-init",
+				"--sdk", "go", "--template-dir", "/template",
+				"--iteration", "2",
+				"--command", "call foo",
+				"--span", "foo",
+				"-o", "test.txt",
+			},
+			dagger.ContainerWithExecOpts{
+				UseEntrypoint: true,
+			}).
+		File("test.txt").
+		Contents(ctx)
+
+	return err
+}
+
+func testBasicRunWithWorkdirAndCleanup(ctx context.Context, ctr *dagger.Container) error {
+	ctx, span := Tracer().Start(ctx, "test run with workdir and auto cleanup")
+	defer span.End()
+
+	_, err := ctr.
+		WithDirectory("/tmp/workdir", dag.Directory()).
+		WithExec(
+			[]string{
+				"run", "-i", "2", "--name", "test", "--workdir", "/tmp/workdir",
+				"--command", "init --sdk=go --name=test --source=.",
+				"--span", "generatedContextDirectory",
 				"-o", "test.txt",
 			},
 			dagger.ContainerWithExecOpts{

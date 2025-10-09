@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"dagger/dagbench-ci/internal/dagger"
 )
 

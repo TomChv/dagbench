@@ -37,8 +37,8 @@ func Run(ctx context.Context, conf *config.Config) (*Result, error) {
 		result[i] = make(map[string]time.Duration)
 	}
 
-	for _, cmd := range conf.Commands {
-		for i := range conf.Iteration {
+	for i := range conf.Iteration {
+		for _, cmd := range conf.Commands {
 			fmt.Printf("Running command %v (iteration=%d)", cmd.Args, i)
 
 			if err := daggerCLI.PruneCache(ctx); err != nil {
@@ -96,6 +96,16 @@ func Run(ctx context.Context, conf *config.Config) (*Result, error) {
 			result[i][fmt.Sprintf("%s/%s", strcase.ToLowerCamel(cmd.Args[0]), "cmdDuration")] = cmdDuration
 
 			fmt.Printf("%s\n", inlineRes.String())
+		}
+
+		if conf.CleanUpAfterIteration() {
+			if err := os.RemoveAll(conf.Workdir); err != nil {
+				return nil, fmt.Errorf("failed to clean up workdir: %w", err)
+			}
+
+			if err := os.MkdirAll(conf.Workdir, 0o750); err != nil {
+				return nil, fmt.Errorf("failed to create workdir: %w", err)
+			}
 		}
 	}
 

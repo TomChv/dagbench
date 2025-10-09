@@ -130,6 +130,10 @@ func configFromFile() (*config.Config, error) {
 		conf.Iteration = iteration
 	}
 
+	if workdir != "" {
+		conf.Workdir = workdir
+	}
+
 	if debug {
 		conf.EnableDebug()
 	}
@@ -160,6 +164,10 @@ func configFromFlag() *config.Config {
 
 	if debug {
 		configOpts = append(configOpts, config.EnableDebug())
+	}
+
+	if workdir != "" {
+		configOpts = append(configOpts, config.WithWorkdir(workdir))
 	}
 
 	return config.New(name, daggerBin, iteration, configOpts...)

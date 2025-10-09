@@ -38,6 +38,12 @@ func WithCommand(spanNames []string, args []string) OptFunc {
 	}
 }
 
+func WithWorkdir(workdir string) OptFunc {
+	return func(config *Config) {
+		config.Workdir = workdir
+	}
+}
+
 // EnableDebug enables the debug mode of the config.
 func EnableDebug() OptFunc {
 	return func(config *Config) {

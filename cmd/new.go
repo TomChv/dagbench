@@ -32,6 +32,10 @@ var newCmd = &cobra.Command{
 			configOpts = append(configOpts, config.WithModule(module))
 		}
 
+		if workdir != "" {
+			configOpts = append(configOpts, config.WithWorkdir(workdir))
+		}
+
 		if useCloud {
 			configOpts = append(configOpts, config.EnableCloud())
 		}
