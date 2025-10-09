@@ -1,9 +1,18 @@
 package main
 
 import (
-	"strings"
+	"errors"
 
 	"dagger/dagbench/internal/dagger"
+)
+
+const (
+	daggerRepo = "https://github.com/dagger/dagger"
+)
+
+var (
+	errDaggerSourceAndVersionConflict = errors.New("dagger source and version are both set but they are mutually exclusive")
+	errMissingDaggerSource            = errors.New("dagger source is missing")
 )
 
 type CLI struct {
@@ -11,39 +20,35 @@ type CLI struct {
 	Ctr *dagger.Container
 }
 
-const (
-	baseImage  = "alpine:3.22"
-	daggerRepo = "https://github.com/dagger/dagger"
-)
+func newCLI(dagBenchBinary *dagger.File, opts ...CLIOptsFunc) (*CLI, error) {
+	cli := &CLIOpts{}
 
-func daggerCtr(daggerVersion string) *dagger.Container {
-	daggerRepo := dag.Git(daggerRepo)
-
-	var daggerRef *dagger.GitRef
-
-	// Naive version parsing
-	if strings.HasPrefix(daggerVersion, "v") && strings.Contains(daggerVersion, ".") {
-		daggerRef = daggerRepo.Tag(daggerVersion)
-	} else if !strings.ContainsAny(daggerVersion, "0123456789") || strings.ContainsAny(daggerVersion, "-_/") {
-		daggerRef = daggerRepo.Branch(daggerVersion)
-	} else {
-		daggerRef = daggerRepo.Commit(daggerVersion)
+	for _, opt := range opts {
+		opt(cli)
 	}
 
-	daggerSource := daggerRef.Tree(dagger.GitRefTreeOpts{DiscardGitDir: true})
+	if cli.daggerVersion != "" && cli.daggerSource != nil {
+		return nil, errDaggerSourceAndVersionConflict
+	}
 
-	return dag.
+	if cli.daggerVersion != "" && cli.daggerSource == nil {
+		cli.daggerSource = fetchSourceFromGit(cli.daggerVersion)
+	}
+
+	if cli.daggerSource == nil {
+		return nil, errMissingDaggerSource
+	}
+
+	daggerCtr := dag.
 		DaggerDev(dagger.DaggerDevOpts{
-			Source: daggerSource,
+			Source: cli.daggerSource,
 		}).Dev()
-}
 
-func newCLI(binary *dagger.File, daggerVersion string) *CLI {
 	return &CLI{
-		Ctr: daggerCtr(daggerVersion).
-			WithMountedFile("/bin/dagbench", binary).
+		Ctr: daggerCtr.
+			WithMountedFile("/bin/dagbench", dagBenchBinary).
 			WithEntrypoint([]string{"/bin/dagbench"}),
-	}
+	}, nil
 }
 
 func (c *CLI) Container() *dagger.Container {
