@@ -171,4 +171,26 @@ dagbench run --config example.json -i 2 --sdk typescript
 
 ## CI
 
-TODO
+**Run integration tests**
+
+```shell
+dagger -m .dagger/integration_test -c all
+```
+
+**Build the binary**
+
+```shell
+dagger -m .dagger/ci -c 'build | export dagbench'
+```
+
+**Lint project**
+
+```shell
+dagger -m .dagger/ci -c 'lint'
+```
+
+**Format project**
+
+```shell
+dagger -m .dagger/ci -c 'fmt | export .'
+```

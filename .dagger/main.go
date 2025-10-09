@@ -3,44 +3,24 @@ package main
 import (
 	"context"
 
-	"dagger/dagbench/integration"
 	"dagger/dagbench/internal/dagger"
-
-	"golang.org/x/sync/errgroup"
 )
 
-type Dagbench struct {
-	//+private
-	Source *dagger.Directory
-}
-
-func New(
-	//+defaultPath="/"
-	source *dagger.Directory,
-) *Dagbench {
-	return &Dagbench{
-		Source: source,
-	}
-}
+type Dagbench struct{}
 
 func (d *Dagbench) Bin(
 	ctx context.Context,
 
 	//+optional
 	platform dagger.Platform,
-) (_ *dagger.File, err error) {
-	if platform == "" {
-		platform, err = dag.DefaultPlatform(ctx)
-		if err != nil {
-			return nil, err
-		}
+) *dagger.File {
+	opts := dagger.DagbenchCiBuildOpts{}
+
+	if platform != "" {
+		opts.Platform = platform
 	}
 
-	return dag.
-		DagbenchCi(d.Source).
-		Build(dagger.GoBuildOpts{
-			Platform: platform,
-		}).File("bin/dagbench.io"), nil
+	return dag.DagbenchCi().Build(opts)
 }
 
 func (d *Dagbench) CLI(
@@ -51,26 +31,8 @@ func (d *Dagbench) CLI(
 
 	//+optional
 	platform dagger.Platform,
-) (*CLI, error) {
-	binary, err := d.Bin(ctx, platform)
-	if err != nil {
-		return nil, err
-	}
+) *CLI {
+	binary := d.Bin(ctx, platform)
 
 	return newCLI(binary, daggerVersion)
-}
-
-func (d *Dagbench) IntegrationTest(
-	ctx context.Context,
-) error {
-	cli, err := d.CLI(ctx, "main", "")
-	if err != nil {
-		return err
-	}
-
-	eg, gctx := errgroup.WithContext(ctx)
-
-	eg.Go(func() error { return integration.TestBasic(gctx, cli) })
-
-	return eg.Wait()
 }

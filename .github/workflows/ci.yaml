@@ -24,25 +24,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          go-version: 1.25.1
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+      - name: Execute golangci-lint
+        uses: dagger/dagger-for-github@v8.2.0
         with:
-          version: v2.5.0
+          version: "v0.19.2"
+          module: .dagger/ci
+          shell: lint
+          dagger-flags: --cloud
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Compile dagbench using dagger
+      - name: Compile dagbench binary
         uses: dagger/dagger-for-github@v8.2.0
         with:
           version: "v0.19.2"
-          shell: bin --platform linux/amd64 | export dagbench
+          module: .dagger/ci
+          shell: build --platform linux/amd64 | export dagbench
           dagger-flags: --cloud
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
 
@@ -58,6 +60,7 @@ jobs:
         uses: dagger/dagger-for-github@v8.2.0
         with:
           version: "v0.19.2"
-          shell: integration-test
+          module: .dagger/integration_test
+          shell: all
           dagger-flags: --cloud
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}

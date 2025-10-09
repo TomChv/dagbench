@@ -38,12 +38,12 @@ func daggerCtr(daggerVersion string) *dagger.Container {
 		}).Dev()
 }
 
-func newCLI(binary *dagger.File, daggerVersion string) (*CLI, error) {
+func newCLI(binary *dagger.File, daggerVersion string) *CLI {
 	return &CLI{
 		Ctr: daggerCtr(daggerVersion).
 			WithMountedFile("/bin/dagbench", binary).
 			WithEntrypoint([]string{"/bin/dagbench"}),
-	}, nil
+	}
 }
 
 func (c *CLI) Container() *dagger.Container {

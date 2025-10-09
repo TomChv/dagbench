@@ -1,13 +1,13 @@
-package integration
+package main
 
 import (
 	"context"
 
-	"dagger/dagbench/internal/dagger"
+	"dagger/dagbench-test/internal/dagger"
 	"golang.org/x/sync/errgroup"
 )
 
-func TestBasic(ctx context.Context, cli CLI) error {
+func testBasic(ctx context.Context, cli *dagger.DagbenchCli) error {
 	eg, gctx := errgroup.WithContext(ctx)
 
 	eg.Go(func() error { return testBasicRunFromCLI(gctx, cli) })
@@ -17,7 +17,7 @@ func TestBasic(ctx context.Context, cli CLI) error {
 	return eg.Wait()
 }
 
-func testBasicRunFromCLI(ctx context.Context, cli CLI) error {
+func testBasicRunFromCLI(ctx context.Context, cli *dagger.DagbenchCli) error {
 	ctx, span := Tracer().Start(ctx, "test run from CLI flag")
 	defer span.End()
 
@@ -41,7 +41,7 @@ func testBasicRunFromCLI(ctx context.Context, cli CLI) error {
 	return err
 }
 
-func testBasicRunFromConfigFile(ctx context.Context, cli CLI) error {
+func testBasicRunFromConfigFile(ctx context.Context, cli *dagger.DagbenchCli) error {
 	ctx, span := Tracer().Start(ctx, "test run from config file")
 	defer span.End()
 
@@ -68,7 +68,7 @@ func testBasicRunFromConfigFile(ctx context.Context, cli CLI) error {
 	return err
 }
 
-func testBasicRunFromExistingModule(ctx context.Context, cli CLI) error {
+func testBasicRunFromExistingModule(ctx context.Context, cli *dagger.DagbenchCli) error {
 	ctx, span := Tracer().Start(ctx, "test run from existing module")
 	defer span.End()
 
