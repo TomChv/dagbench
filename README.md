@@ -13,7 +13,14 @@ dagger -m github.com/TomChv/dagbenchmark -c 'bin | export dagbench'
 Or directly use the `dagbench` inside the CLI container.
 
 ```shell
-dagger -m -m github.com/TomChv/dagbenchmark -c 'cli | container | terminal' 
+dagger -m github.com/TomChv/dagbenchmark -c 'cli | container | terminal' 
+```
+
+Or use it as a [module dependency](https://daggerverse.dev/mod/github.com/TomChv/dagbench) to create benchmarks
+shaped on your needs.
+
+```shell
+dagger install github.com/TomChv/dagbenchmark
 ```
 
 ## Usage
