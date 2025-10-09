@@ -10,7 +10,7 @@ You can either install the binary using the `dagger module`
 dagger -m github.com/TomChv/dagbenchmark -c 'bin | export dagbench'
 ```
 
-Or directly use the `dagbench` inside the CLI container.
+Or directly use `dagbench` inside the CLI container.
 
 ```shell
 dagger -m github.com/TomChv/dagbenchmark -c 'cli | container | terminal' 
