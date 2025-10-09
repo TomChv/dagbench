@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 
+	"dagger/dagbench/integration"
 	"dagger/dagbench/internal/dagger"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type Dagbench struct {
@@ -55,4 +58,19 @@ func (d *Dagbench) CLI(
 	}
 
 	return newCLI(binary, daggerVersion)
+}
+
+func (d *Dagbench) IntegrationTest(
+	ctx context.Context,
+) error {
+	cli, err := d.CLI(ctx, "main", "")
+	if err != nil {
+		return err
+	}
+
+	eg, gctx := errgroup.WithContext(ctx)
+
+	eg.Go(func() error { return integration.TestBasic(gctx, cli) })
+
+	return eg.Wait()
 }

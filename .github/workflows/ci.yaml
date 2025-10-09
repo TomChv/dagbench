@@ -46,3 +46,16 @@ jobs:
 
       - name: Run dagbench help
         run: ./dagbench --help
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run integration tests
+        uses: dagger/dagger-for-github@v8.2.0
+        with:
+          version: "v0.19.2"
+          shell: integration-test
+          dagger-flags: --cloud
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
