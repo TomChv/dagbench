@@ -22,6 +22,7 @@ func (d *DagbenchTest) All(
 	eg, gctx := errgroup.WithContext(ctx)
 
 	eg.Go(func() error { return testBasic(gctx, ctr) })
+	eg.Go(func() error { return testAdvanced(gctx, ctr) })
 
 	return eg.Wait()
 }
@@ -35,6 +36,17 @@ func (d *DagbenchTest) Basic(
 	}
 
 	return testBasic(ctx, ctr)
+}
+
+func (d *DagbenchTest) Advanced(
+	ctx context.Context,
+) error {
+	ctr, err := getDagBenchContainer(ctx)
+	if err != nil {
+		return err
+	}
+
+	return testAdvanced(ctx, ctr)
 }
 
 func getDagBenchContainer(ctx context.Context) (*dagger.Container, error) {
