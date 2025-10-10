@@ -99,7 +99,7 @@ func Run(ctx context.Context, conf *config.Config) (*Result, error) {
 		}
 
 		if conf.CleanUpAfterIteration() {
-			if err := os.RemoveAll(conf.Workdir); err != nil {
+			if err := os.Remove(filepath.Join(conf.Workdir, "dagger.json")); err != nil {
 				return nil, fmt.Errorf("failed to clean up workdir: %w", err)
 			}
 
