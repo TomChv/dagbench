@@ -16,4 +16,5 @@ func Execute() error {
 func init() {
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(plotCmd)
 }

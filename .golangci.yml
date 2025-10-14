@@ -29,6 +29,10 @@ linters:
         text: "G304"
       - path: config/load\.go
         text: "G304"
+      - path: plots/multiBar\.go
+        text: "G304"
+      - path: benchmark/parser\.go
+        text: "G304"
 
       # Exclude comments rules from revive linter
       - linters:
