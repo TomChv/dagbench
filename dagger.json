@@ -8,11 +8,6 @@
     {
       "name": "dagbench-ci",
       "source": ".dagger/ci"
-    },
-    {
-      "name": "dagger-dev",
-      "source": "github.com/dagger/dagger@main",
-      "pin": "5b07b0b4b4208b5009866e7219a72d0957213c44"
     }
   ],
   "source": ".dagger"

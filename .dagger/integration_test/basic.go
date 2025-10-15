@@ -7,21 +7,23 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func testBasic(ctx context.Context, ctr *dagger.Container) error {
+func testBasic(ctx context.Context) error {
 	eg, gctx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error { return testBasicRunFromctr(gctx, ctr) })
-	eg.Go(func() error { return testBasicRunFromConfigFile(gctx, ctr) })
-	eg.Go(func() error { return testBasicRunFromExistingModule(gctx, ctr) })
-	eg.Go(func() error { return testBasicRunWithTemplate(gctx, ctr) })
-	eg.Go(func() error { return testBasicRunWithWorkdirAndCleanup(gctx, ctr) })
+	eg.Go(func() error { return testBasicRunFromCtr(gctx) })
+	eg.Go(func() error { return testBasicRunFromConfigFile(gctx) })
+	eg.Go(func() error { return testBasicRunFromExistingModule(gctx) })
+	eg.Go(func() error { return testBasicRunWithTemplate(gctx) })
+	eg.Go(func() error { return testBasicRunWithWorkdirAndCleanup(gctx) })
 
 	return eg.Wait()
 }
 
-func testBasicRunFromctr(ctx context.Context, ctr *dagger.Container) error {
+func testBasicRunFromCtr(ctx context.Context) error {
 	ctx, span := Tracer().Start(ctx, "test run from ctr flag")
 	defer span.End()
+
+	ctr := getTestCtr("basic-run-from-ctr")
 
 	_, err := ctr.
 		WithExec(
@@ -42,9 +44,11 @@ func testBasicRunFromctr(ctx context.Context, ctr *dagger.Container) error {
 	return err
 }
 
-func testBasicRunFromConfigFile(ctx context.Context, ctr *dagger.Container) error {
+func testBasicRunFromConfigFile(ctx context.Context) error {
 	ctx, span := Tracer().Start(ctx, "test run from config file")
 	defer span.End()
+
+	ctr := getTestCtr("basic-run-from-config-file")
 
 	configFile := ctr.
 		WithExec(
@@ -67,9 +71,11 @@ func testBasicRunFromConfigFile(ctx context.Context, ctr *dagger.Container) erro
 	return err
 }
 
-func testBasicRunFromExistingModule(ctx context.Context, ctr *dagger.Container) error {
+func testBasicRunFromExistingModule(ctx context.Context) error {
 	ctx, span := Tracer().Start(ctx, "test run from existing module")
 	defer span.End()
+
+	ctr := getTestCtr("basic-run-from-existing-module")
 
 	_, err := ctr.
 		WithWorkdir("/test-module").
@@ -90,9 +96,11 @@ func testBasicRunFromExistingModule(ctx context.Context, ctr *dagger.Container) 
 	return err
 }
 
-func testBasicRunWithTemplate(ctx context.Context, ctr *dagger.Container) error {
+func testBasicRunWithTemplate(ctx context.Context) error {
 	ctx, span := Tracer().Start(ctx, "test run with template")
 	defer span.End()
+
+	ctr := getTestCtr("basic-run-with-template")
 
 	_, err := ctr.
 		WithDirectory(
@@ -125,9 +133,11 @@ func (t *Test) Foo() string {
 	return err
 }
 
-func testBasicRunWithWorkdirAndCleanup(ctx context.Context, ctr *dagger.Container) error {
+func testBasicRunWithWorkdirAndCleanup(ctx context.Context) error {
 	ctx, span := Tracer().Start(ctx, "test run with workdir and auto cleanup")
 	defer span.End()
+
+	ctr := getTestCtr("basic-run-with-workdir-and-cleanup")
 
 	_, err := ctr.
 		WithDirectory("/tmp/workdir", dag.Directory()).

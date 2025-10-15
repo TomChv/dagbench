@@ -23,6 +23,18 @@ shaped on your needs.
 dagger install github.com/TomChv/dagbenchmark
 ```
 
+You can also specify a dagger engine version using shell:
+
+```shell
+dagger -m github.com/TomChv/dagbenchmark -c 'cli --dagger-tag v0.16.0 | container | terminal' 
+```
+
+Or provide the dagger engine container directly:
+
+```shell
+dagger -m github.com/TomChv/dagbenchmark -c 'cli --dagger-ctr $(github.com/dagger/dagger@main | dev) | container | terminal' 
+```
+
 ## Usage
 
 `dagbench` produces a go benchmark report compatible with [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat) so you

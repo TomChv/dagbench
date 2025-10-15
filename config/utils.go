@@ -16,7 +16,7 @@ func generateDefaultWorkdir(name string) string {
 }
 
 func getDaggerVersion(ctx context.Context, binPath string) (string, error) {
-	version, err := exec.CommandContext(ctx, binPath, "version").Output()
+	version, err := exec.CommandContext(ctx, binPath, "core", "version").Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to execute dagger version: %w", err)
 	}

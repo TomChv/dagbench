@@ -20,30 +20,7 @@ type CLI struct {
 	Ctr *dagger.Container
 }
 
-func newCLI(dagBenchBinary *dagger.File, opts ...CLIOptsFunc) (*CLI, error) {
-	cli := &CLIOpts{}
-
-	for _, opt := range opts {
-		opt(cli)
-	}
-
-	if cli.daggerVersion != "" && cli.daggerSource != nil {
-		return nil, errDaggerSourceAndVersionConflict
-	}
-
-	if cli.daggerVersion != "" && cli.daggerSource == nil {
-		cli.daggerSource = fetchSourceFromGit(cli.daggerVersion)
-	}
-
-	if cli.daggerSource == nil {
-		return nil, errMissingDaggerSource
-	}
-
-	daggerCtr := dag.
-		DaggerDev(dagger.DaggerDevOpts{
-			Source: cli.daggerSource,
-		}).Dev()
-
+func newCLI(dagBenchBinary *dagger.File, daggerCtr *dagger.Container) (*CLI, error) {
 	return &CLI{
 		Ctr: daggerCtr.
 			WithMountedFile("/bin/dagbench", dagBenchBinary).

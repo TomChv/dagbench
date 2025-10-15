@@ -29,15 +29,18 @@ func (d *Dagbench) Bin(
 func (d *Dagbench) CLI(
 	ctx context.Context,
 
-	// The dagger engine to use with dagbench to run the benchmarks
-	//+default="main"
-	daggerVersion string,
-
-	// The dagger repository to use to build the dagger container
-	// This should only be used to test a local dagger version.
-	// This will override the daggerVersion if set.
+	// The dagger tag to create the engine
+	//+default="latest"
 	//+optional
-	daggerSource *dagger.Directory,
+	daggerTag string,
+
+	// The dagger cache volume to use
+	//+optional
+	daggerCacheVolume string,
+
+	// The dagger engine container to use with the dagbench CLI.
+	//+optional
+	daggerCtr *dagger.Container,
 
 	// The platform to use to build the dagbench binary.
 	//+optional
@@ -45,15 +48,18 @@ func (d *Dagbench) CLI(
 ) (*CLI, error) {
 	binary := d.Bin(ctx, platform)
 
-	opts := []CLIOptsFunc{}
-
-	if daggerSource != nil {
-		opts = append(opts, withDaggerSource(daggerSource))
+	if daggerCtr != nil {
+		return newCLI(binary, daggerCtr)
 	}
 
-	if daggerVersion != "" && daggerSource == nil {
-		opts = append(opts, withDaggerVersion(daggerVersion))
+	if daggerCacheVolume == "" {
+		daggerCacheVolume = buildUniqueCacheVolumeName(daggerTag)
 	}
 
-	return newCLI(binary, opts...)
+	daggerCtr, err := daggerContainerFromTag(ctx, daggerCacheVolume, daggerTag)
+	if err != nil {
+		return nil, err
+	}
+
+	return newCLI(binary, daggerCtr)
 }

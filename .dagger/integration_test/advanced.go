@@ -8,15 +8,15 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func testAdvanced(ctx context.Context, ctr *dagger.Container) error {
+func testAdvanced(ctx context.Context) error {
 	eg, gctx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error { return testAdvanceBenchInitFromExistingConfigWithModule(gctx, ctr) })
+	eg.Go(func() error { return testAdvanceBenchInitFromExistingConfigWithModule(gctx) })
 
 	return eg.Wait()
 }
 
-func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context, ctr *dagger.Container) error {
+func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context) error {
 	ctx, span := Tracer().Start(ctx, "test benchmark init with an existing module")
 	defer span.End()
 
@@ -44,6 +44,8 @@ func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context, ctr *
     }
   ]
 }`
+
+	ctr := getTestCtr("advanced-test-advance-bench-init-from-existing-config-with-module")
 
 	mod := ctr.
 		WithWorkdir("/tmp/module").
