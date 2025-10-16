@@ -56,6 +56,8 @@ func MultiLinearByVersion(data DataSet, title string) (*plot.Plot, error) {
 	}
 	sort.Strings(opNames)
 
+	maxValue := 0.0
+
 	// Add lines to plot
 	for i, op := range opNames {
 		pts := make(plotter.XYs, len(versions))
@@ -64,6 +66,10 @@ func MultiLinearByVersion(data DataSet, title string) (*plot.Plot, error) {
 
 			if val, ok := data[op][v]; ok {
 				pts[j].Y = val
+
+				if val > maxValue {
+					maxValue = val
+				}
 			} else {
 				pts[j].Y = math.NaN() // break the line if missing
 			}
@@ -89,6 +95,7 @@ func MultiLinearByVersion(data DataSet, title string) (*plot.Plot, error) {
 	p.Legend.TextStyle.Font.Size = vg.Points(11)
 	p.Legend.TextStyle.Color = color.Black
 	p.Legend.Top = true
+	p.Y.Max = maxValue * 1.2
 
 	return p, nil
 }
