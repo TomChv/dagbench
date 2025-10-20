@@ -2,25 +2,21 @@ package main
 
 import (
 	"context"
+	"testing"
 
 	"dagger/dagbench-test/internal/dagger"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/dagger/testctx"
+	"github.com/stretchr/testify/require"
 )
 
-func testAdvanced(ctx context.Context) error {
-	eg, gctx := errgroup.WithContext(ctx)
+type AdvancedSuite struct{}
 
-	eg.Go(func() error { return testUseContainer(gctx) })
-	eg.Go(func() error { return testAdvanceBenchInitFromExistingConfigWithModule(gctx) })
-
-	return eg.Wait()
+func TestAdvanced(t *testing.T) {
+	testctx.New(t, Middlewares()...).RunTests(AdvancedSuite{})
 }
 
-func testUseContainer(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test use container")
-	defer span.End()
-
+func (AdvancedSuite) TestUseContainer(ctx context.Context, t *testctx.T) {
 	_, err := getTestCLI("test-use-container").
 		Container().
 		WithExec(
@@ -38,13 +34,10 @@ func testUseContainer(ctx context.Context) error {
 		File("test.txt").
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }
 
-func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test benchmark init with an existing module")
-	defer span.End()
-
+func (AdvancedSuite) TestBenchInitFromExistingConfigWithModule(ctx context.Context, t *testctx.T) {
 	config := `{
   "name": "test",
   "commands": [
@@ -90,5 +83,5 @@ func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context) error
 		Exec().
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }
