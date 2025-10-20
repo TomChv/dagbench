@@ -2,26 +2,19 @@ package main
 
 import (
 	"context"
+	"testing"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/dagger/testctx"
+	"github.com/stretchr/testify/require"
 )
 
-func testBasic(ctx context.Context) error {
-	eg, gctx := errgroup.WithContext(ctx)
+type BasicSuite struct{}
 
-	eg.Go(func() error { return testBasicRunFromCtr(gctx) })
-	eg.Go(func() error { return testBasicRunFromConfigFile(gctx) })
-	eg.Go(func() error { return testBasicRunFromExistingModule(gctx) })
-	eg.Go(func() error { return testBasicRunWithTemplate(gctx) })
-	eg.Go(func() error { return testBasicRunWithWorkdirAndCleanup(gctx) })
-
-	return eg.Wait()
+func TestBasic(t *testing.T) {
+	testctx.New(t, Middlewares()...).RunTests(BasicSuite{})
 }
 
-func testBasicRunFromCtr(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test run from ctr flag")
-	defer span.End()
-
+func (BasicSuite) TestRunFromCtr(ctx context.Context, t *testctx.T) {
 	_, err := getTestCLI("test-basic-run-from-ctr").
 		Run().
 		WithName("test").
@@ -33,13 +26,10 @@ func testBasicRunFromCtr(ctx context.Context) error {
 		Exec().
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }
 
-func testBasicRunFromConfigFile(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test run from config file")
-	defer span.End()
-
+func (BasicSuite) TestRunFromConfigFile(ctx context.Context, t *testctx.T) {
 	cli := getTestCLI("basic-run-from-config-file")
 
 	configFile := cli.
@@ -57,13 +47,10 @@ func testBasicRunFromConfigFile(ctx context.Context) error {
 		Exec().
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }
 
-func testBasicRunFromExistingModule(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test run from existing module")
-	defer span.End()
-
+func (BasicSuite) TestRunFromExistingModule(ctx context.Context, t *testctx.T) {
 	cli := getTestCLI("basic-run-from-existing-module")
 
 	module := cli.
@@ -82,13 +69,10 @@ func testBasicRunFromExistingModule(ctx context.Context) error {
 		Exec().
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }
 
-func testBasicRunWithTemplate(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test run with template")
-	defer span.End()
-
+func (BasicSuite) TestRunWithTemplate(ctx context.Context, t *testctx.T) {
 	templateDir := dag.Directory().WithNewFile(
 		"main.go",
 		`package main
@@ -111,13 +95,10 @@ func (t *Test) Foo() string {
 		Exec().
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }
 
-func testBasicRunWithWorkdirAndCleanup(ctx context.Context) error {
-	ctx, span := Tracer().Start(ctx, "test run with workdir and auto cleanup")
-	defer span.End()
-
+func (BasicSuite) TestRunWithWorkdirAndCleanup(ctx context.Context, t *testctx.T) {
 	_, err := getTestCLI("basic-run-with-workdir-and-cleanup").
 		Run().
 		WithName("test").
@@ -128,5 +109,5 @@ func testBasicRunWithWorkdirAndCleanup(ctx context.Context) error {
 		Exec().
 		Contents(ctx)
 
-	return err
+	require.NoError(t, err)
 }

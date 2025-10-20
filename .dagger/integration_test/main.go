@@ -1,42 +1,21 @@
 package main
 
 import (
-	"context"
-
-	"golang.org/x/sync/errgroup"
+	"dagger/dagbench-test/dagtest"
+	"fmt"
 )
 
 type DagbenchTest struct{}
 
-func (d *DagbenchTest) All(
-	ctx context.Context,
-) error {
-	eg, gctx := errgroup.WithContext(ctx)
+func (d *DagbenchTest) All() error {
+	// TODO: allow more granularity
+	testRunner := dagtest.New().
+		WithTest("Basic", TestBasic).
+		WithTest("Advanced", TestAdvanced)
 
-	eg.Go(func() error {
-		sctx, span := Tracer().Start(gctx, "basic")
-		defer span.End()
+	if code := testRunner.Run(); code != 0 {
+		return fmt.Errorf("dagbench tests failed with code %d", code)
+	}
 
-		return testBasic(sctx)
-	})
-	eg.Go(func() error {
-		sctx, span := Tracer().Start(gctx, "advanced")
-		defer span.End()
-
-		return testAdvanced(sctx)
-	})
-
-	return eg.Wait()
-}
-
-func (d *DagbenchTest) Basic(
-	ctx context.Context,
-) error {
-	return testBasic(ctx)
-}
-
-func (d *DagbenchTest) Advanced(
-	ctx context.Context,
-) error {
-	return testAdvanced(ctx)
+	return nil
 }
