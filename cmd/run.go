@@ -43,6 +43,7 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run a dagger benchmark",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		cmd.SilenceUsage = true
 		ctx := cmd.Context()
 
 		var configuration *config.Config

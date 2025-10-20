@@ -26,7 +26,8 @@ var plotSingleBarCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Use:   "single-bar [file]",
 	Short: "Create a bar visualization for a single benchmark file",
-	RunE: func(_ *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		file := args[0]
 		opts := benchmark.ParserOpts{
 			UseCmdDuration: useCmdDuration,
@@ -67,7 +68,8 @@ var plotMultiBarCmd = &cobra.Command{
 
 You can use it to compare the same module but with different setup.
 For instance, comparing a TypeScript module but with Node, Bun or Deno runtime.`,
-	RunE: func(_ *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		opts := benchmark.ParserOpts{
 			UseCmdDuration: useCmdDuration,
 		}
@@ -111,7 +113,8 @@ var plotVersionsCmd = &cobra.Command{
 	Long: `Create a linear vizualisation from multiple benchmark files.
 
 You can use it to compare the same module over time to see the evolution of the performance.`,
-	RunE: func(_ *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.SilenceUsage = true
 		opts := benchmark.ParserOpts{
 			UseCmdDuration: useCmdDuration,
 		}

@@ -13,8 +13,18 @@ func (d *DagbenchTest) All(
 ) error {
 	eg, gctx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error { return testBasic(gctx) })
-	eg.Go(func() error { return testAdvanced(gctx) })
+	eg.Go(func() error {
+		sctx, span := Tracer().Start(gctx, "basic")
+		defer span.End()
+
+		return testBasic(sctx)
+	})
+	eg.Go(func() error {
+		sctx, span := Tracer().Start(gctx, "advanced")
+		defer span.End()
+
+		return testAdvanced(sctx)
+	})
 
 	return eg.Wait()
 }

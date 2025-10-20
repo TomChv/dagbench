@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"dagger/dagbench/internal/dagger"
 	"fmt"
+
+	"dagger/dagbench/internal/dagger"
 
 	"github.com/google/uuid"
 )

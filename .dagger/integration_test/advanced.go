@@ -11,9 +11,34 @@ import (
 func testAdvanced(ctx context.Context) error {
 	eg, gctx := errgroup.WithContext(ctx)
 
+	eg.Go(func() error { return testUseContainer(gctx) })
 	eg.Go(func() error { return testAdvanceBenchInitFromExistingConfigWithModule(gctx) })
 
 	return eg.Wait()
+}
+
+func testUseContainer(ctx context.Context) error {
+	ctx, span := Tracer().Start(ctx, "test use container")
+	defer span.End()
+
+	_, err := getTestCLI("test-use-container").
+		Container().
+		WithExec(
+			[]string{
+				"run",
+				"--name", "test", "--auto-init",
+				"--sdk", "go", "--iteration", "2",
+				"--command", "call container-echo --string-arg=hello",
+				"--span", "containerEcho",
+				"-o", "test.txt",
+			},
+			dagger.ContainerWithExecOpts{
+				UseEntrypoint: true,
+			}).
+		File("test.txt").
+		Contents(ctx)
+
+	return err
 }
 
 func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context) error {
@@ -45,31 +70,24 @@ func testAdvanceBenchInitFromExistingConfigWithModule(ctx context.Context) error
   ]
 }`
 
-	ctr := getTestCtr("advanced-test-advance-bench-init-from-existing-config-with-module")
+	cli := getTestCLI("advanced-test-advance-bench-init-from-existing-config-with-module")
 
-	mod := ctr.
+	mod := cli.
+		Container().
 		WithWorkdir("/tmp/module").
 		WithExec([]string{"dagger", "init", "--sdk=go", "--name=benchmark", "--source=."}).
 		Directory("/tmp/module")
 
-	_, err := ctr.
-		WithDirectory(
-			"/module", mod,
-			dagger.ContainerWithDirectoryOpts{
+	_, err := cli.
+		Run().
+		WithWorkdir("/module", dagger.DagbenchCmdRunWithWorkdirOpts{
+			Directory: dag.Directory().WithDirectory(".", mod, dagger.DirectoryWithDirectoryOpts{
 				Exclude: []string{"dagger.json", "dagger.gen.go", "internal"},
-			}).
-		WithNewFile("/config.json", config).
-		WithExec(
-			[]string{
-				"run", "--workdir", "/module",
-				"--config", "/config.json",
-				"-i", "2", "-o", "test.txt",
-			},
-			dagger.ContainerWithExecOpts{
-				UseEntrypoint: true,
-			},
-		).
-		File("test.txt").
+			}),
+		}).
+		WithConfigFile(dag.File("config.json", config)).
+		WithIteration(2).
+		Exec().
 		Contents(ctx)
 
 	return err

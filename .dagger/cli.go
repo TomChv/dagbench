@@ -1,18 +1,7 @@
 package main
 
 import (
-	"errors"
-
 	"dagger/dagbench/internal/dagger"
-)
-
-const (
-	daggerRepo = "https://github.com/dagger/dagger"
-)
-
-var (
-	errDaggerSourceAndVersionConflict = errors.New("dagger source and version are both set but they are mutually exclusive")
-	errMissingDaggerSource            = errors.New("dagger source is missing")
 )
 
 type CLI struct {
@@ -30,4 +19,16 @@ func newCLI(dagBenchBinary *dagger.File, daggerCtr *dagger.Container) (*CLI, err
 
 func (c *CLI) Container() *dagger.Container {
 	return c.Ctr
+}
+
+func (c *CLI) Run() *CmdRun {
+	return newRunCmd(c.Ctr)
+}
+
+func (c *CLI) Plot() *CmdPlot {
+	return newPlotCmd(c.Ctr)
+}
+
+func (c *CLI) New() *CmdNew {
+	return newNewCmd(c.Ctr)
 }

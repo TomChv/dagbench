@@ -18,6 +18,7 @@ var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Create a new benchmark configuration",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		cmd.SilenceUsage = true
 		configOpts := []config.OptFunc{}
 
 		if autoInit {
